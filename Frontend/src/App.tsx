@@ -3,22 +3,29 @@ import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
-import Videos from "./pages/UiElements/Videos";
-import Images from "./pages/UiElements/Images";
-import Alerts from "./pages/UiElements/Alerts";
-import Badges from "./pages/UiElements/Badges";
-import Avatars from "./pages/UiElements/Avatars";
-import Buttons from "./pages/UiElements/Buttons";
-import LineChart from "./pages/Charts/LineChart";
-import BarChart from "./pages/Charts/BarChart";
-import Calendar from "./pages/Calendar";
-import BasicTables from "./pages/Tables/BasicTables";
-import FormElements from "./pages/Forms/FormElements";
-import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import LandingPage from "./pages/LandingPage";
+import CompaniesDashboard from "./pages/Companies/CompaniesDashboard";
+
+// Admin Setup
+import CompanyProfile from "./pages/AdminSetup/CompanyProfile";
+import StaffRoles from "./pages/AdminSetup/StaffRoles";
+import InternalPolicies from "./pages/AdminSetup/InternalPolicies";
+
+// Client Management
+import OnboardingKYC from "./pages/ClientManagement/OnboardingKYC";
+import Agreements from "./pages/ClientManagement/Agreements";
+import Subscriptions from "./pages/ClientManagement/Subscriptions";
+
+// Research Module
+import PublishCall from "./pages/Research/PublishCall";
+import ManageCalls from "./pages/Research/ManageCalls";
+
+// Compliance Engine
+import ComplianceLogs from "./pages/Compliance/ComplianceLogs";
+import PenaltyMatrix from "./pages/Compliance/PenaltyMatrix";
 
 export default function App() {
   return (
@@ -30,29 +37,26 @@ export default function App() {
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Home />} />
-
-            {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+            <Route path="/companies" element={<CompaniesDashboard />} />
+            
+            {/* Admin Setup */}
+            <Route path="/admin/profile" element={<CompanyProfile />} />
+            <Route path="/admin/staff" element={<StaffRoles />} />
+            <Route path="/admin/policies" element={<InternalPolicies />} />
 
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+            {/* Client Management */}
+            <Route path="/clients/onboarding" element={<OnboardingKYC />} />
+            <Route path="/clients/agreements" element={<Agreements />} />
+            <Route path="/clients/subscriptions" element={<Subscriptions />} />
 
-            {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+            {/* Research Module */}
+            <Route path="/research/publish" element={<PublishCall />} />
+            <Route path="/research/manage" element={<ManageCalls />} />
 
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
-
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
+            {/* Compliance Engine */}
+            <Route path="/compliance/logs" element={<ComplianceLogs />} />
+            <Route path="/compliance/matrix" element={<PenaltyMatrix />} />
           </Route>
 
           {/* Auth Layout */}

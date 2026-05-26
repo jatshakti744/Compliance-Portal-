@@ -10,7 +10,9 @@ const userSchema = new mongoose.Schema({
     enum: ['Super Admin', 'Admin', 'Principal Officer', 'Compliance Officer', 'Researcher', 'Staff', 'Client'],
     default: 'Client'
   },
-  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  nismCertificateNumber: { type: String },
+  nismExpiryDate: { type: Date }
 }, {
   timestamps: true
 });

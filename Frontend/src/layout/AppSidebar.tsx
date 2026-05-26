@@ -29,65 +29,56 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
+    path: "/dashboard"
   },
   {
     icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
+    name: "Companies (Super Admin)",
+    path: "/companies"
   },
   {
-    name: "Forms",
+    icon: <CalenderIcon />,
+    name: "Admin Setup",
+    subItems: [
+      { name: "Company Profile", path: "/admin/profile" },
+      { name: "Staff & Roles", path: "/admin/staff" },
+      { name: "Internal Policies", path: "/admin/policies" }
+    ],
+  },
+  {
+    name: "Client Management",
     icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+    subItems: [
+      { name: "Onboarding & KYC", path: "/clients/onboarding" },
+      { name: "Agreements", path: "/clients/agreements" },
+      { name: "Subscriptions", path: "/clients/subscriptions" }
+    ],
   },
   {
-    name: "Tables",
+    name: "Research Module",
     icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+    subItems: [
+      { name: "Publish Call", path: "/research/publish" },
+      { name: "Manage Calls", path: "/research/manage" }
+    ],
   },
   {
-    name: "Pages",
+    name: "Compliance Engine",
     icon: <PageIcon />,
     subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
+      { name: "Compliance Logs", path: "/compliance/logs" },
+      { name: "Penalty Matrix", path: "/compliance/matrix" }
     ],
   },
 ];
 
 const othersItems: NavItem[] = [
   {
-    icon: <PieChartIcon />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
-    ],
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
-    ],
-  },
-  {
     icon: <PlugInIcon />,
     name: "Authentication",
     subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
+      { name: "Sign In", path: "/signin" },
+      { name: "Sign Up", path: "/signup" },
     ],
   },
 ];
