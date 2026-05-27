@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+const generateToken = (id, rememberMe = false) => {
+  // If rememberMe is true, expire in 5 days, else expire in 8 hours
+  const expiresIn = rememberMe ? '5d' : '8h';
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn });
 };
 
 // @desc    Register a new user
@@ -39,7 +41,7 @@ exports.registerUser = async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, rememberMe } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -50,7 +52,7 @@ exports.loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id),
+        token: generateToken(user._id, rememberMe),
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
