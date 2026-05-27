@@ -14,7 +14,10 @@ export const superAdminService = {
       method: "GET",
       credentials: "include",
     });
-    if (!res.ok) throw new Error("Failed to fetch companies");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to fetch companies");
+    }
     return res.json();
   },
   
@@ -25,7 +28,10 @@ export const superAdminService = {
       credentials: "include",
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Failed to create company");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to create company");
+    }
     return res.json();
   },
 
@@ -36,7 +42,10 @@ export const superAdminService = {
       credentials: "include",
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Failed to update company");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to update company");
+    }
     return res.json();
   },
 
@@ -45,7 +54,10 @@ export const superAdminService = {
       method: "PUT",
       credentials: "include",
     });
-    if (!res.ok) throw new Error("Failed to toggle company status");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to toggle company status");
+    }
     return res.json();
   },
 
@@ -54,7 +66,10 @@ export const superAdminService = {
       method: "DELETE",
       credentials: "include",
     });
-    if (!res.ok) throw new Error("Failed to delete company");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to delete company");
+    }
     return res.json();
   }
 };

@@ -5,6 +5,7 @@ import { fDate } from '../../utils/Date_format';
 import DynamicForm, { FormField } from '../../components/common/DynamicForm';
 import DataTable, { Column } from '../../components/common/DataTable';
 import { Modal } from '../../components/ui/modal';
+import Alert from '../../components/ui/alert/Alert';
 
 export default function CompaniesDashboard() {
   const defaultValues = { companyName: '', sebiRegNo: '', email: '', mobile: '', address: '', validity: '' };
@@ -19,6 +20,12 @@ export default function CompaniesDashboard() {
     resetForm?: () => void;
     message: string;
   } | null>(null);
+  const [toast, setToast] = useState<{ variant: "success" | "error", title: string, message: string } | null>(null);
+
+  const showToast = (variant: "success" | "error", title: string, message: string) => {
+    setToast({ variant, title, message });
+    setTimeout(() => setToast(null), 4000);
+  };
   
   // Pagination & Search State
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,25 +65,30 @@ export default function CompaniesDashboard() {
     if (!confirmAction) return;
     try {
       if (confirmAction.type === 'create') {
-        await superAdminService.createCompany(confirmAction.data);
+        const response = await superAdminService.createCompany(confirmAction.data);
         setShowForm(false);
         confirmAction.resetForm?.();
+        showToast('success', 'Company Created', response.message || 'The new RA Entity has been registered successfully.');
       } else if (confirmAction.type === 'update') {
-        await superAdminService.updateCompany(confirmAction.id!, confirmAction.data);
+        const response = await superAdminService.updateCompany(confirmAction.id!, confirmAction.data);
         setShowForm(false);
         setEditId(null);
         setFormValues(defaultValues);
         confirmAction.resetForm?.();
+        showToast('success', 'Company Updated', response.message || 'The company details were updated successfully.');
       } else if (confirmAction.type === 'delete') {
-        await superAdminService.deleteCompany(confirmAction.id!);
+        const response = await superAdminService.deleteCompany(confirmAction.id!);
+        showToast('success', 'Company Deleted', response.message || 'The company was permanently deleted.');
       } else if (confirmAction.type === 'toggle') {
-        await superAdminService.toggleCompanyStatus(confirmAction.id!);
+        const response = await superAdminService.toggleCompanyStatus(confirmAction.id!);
+        showToast('success', 'Status Updated', response.message || 'The company status was toggled successfully.');
       }
       fetchCompanies();
       setConfirmAction(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Action failed. Please try again.');
+      showToast('error', 'Action Failed', err.message || 'An error occurred while performing the action.');
+      setConfirmAction(null);
     }
   };
 
@@ -228,6 +240,12 @@ export default function CompaniesDashboard() {
           </div>
         </div>
       </Modal>
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[999999] shadow-xl rounded-xl transition-all duration-300">
+          <Alert variant={toast.variant} title={toast.title} message={toast.message} />
+        </div>
+      )}
     </div>
   );
 }

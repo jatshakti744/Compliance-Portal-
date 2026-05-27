@@ -84,7 +84,7 @@ router.put('/:id', async (req, res) => {
   try {
     const updatedCompany = await Company.findByIdAndUpdate(req.params.id, req.body, { new: true });
     console.log(`[AUDIT MOCK] Action: Company Updated, ID: ${req.params.id}`);
-    res.json(updatedCompany);
+    res.json({ company: updatedCompany, message: "Company details updated successfully." });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -100,7 +100,7 @@ router.put('/:id/status', async (req, res) => {
     await company.save();
 
     console.log(`[AUDIT MOCK] Action: Company Status Toggled, ID: ${company._id}, New Status: ${company.isActive ? 'Active' : 'Inactive'}`);
-    res.json(company);
+    res.json({ company, message: `Company status changed to ${company.isActive ? 'Active' : 'Inactive'} successfully.` });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -110,7 +110,7 @@ router.put('/:id/status', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     await Company.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Company deleted' });
+    res.json({ message: 'Company was permanently deleted successfully.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
