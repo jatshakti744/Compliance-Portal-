@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import { superAdminService } from '../../services/superAdminService';
 import { fDate } from '../../utils/Date_format';
+import DynamicForm, { FormField } from '../../components/common/DynamicForm';
+import DataTable, { Column } from '../../components/common/DataTable';
 
 export default function CompaniesDashboard() {
   const [companies, setCompanies] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ companyName: '', sebiRegNo: '', email: '', mobile: '', address: '', validity: '' });
 
   const fetchCompanies = async () => {
     try {
@@ -21,17 +22,40 @@ export default function CompaniesDashboard() {
     fetchCompanies();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (data: Record<string, any>, resetForm: () => void) => {
     try {
-      await superAdminService.createCompany(formData);
+      await superAdminService.createCompany(data);
       setShowForm(false);
-      setFormData({ companyName: '', sebiRegNo: '', email: '', mobile: '', address: '', validity: '' });
+      resetForm();
       fetchCompanies();
     } catch (err) {
       console.error(err);
     }
   };
+
+  const fields: FormField[] = [
+    { name: 'companyName', label: 'Company Name', required: true },
+    { name: 'sebiRegNo', label: 'SEBI Reg No.', required: true },
+    { name: 'email', label: 'Email', type: 'email', required: true },
+    { name: 'mobile', label: 'Mobile', required: true },
+    { name: 'validity', label: 'Validity Date', type: 'date', required: true },
+    { name: 'address', label: 'Address', required: true },
+  ];
+
+  const columns: Column<any>[] = [
+    { header: 'Company Name', accessorKey: 'companyName' },
+    { header: 'SEBI Reg No.', accessorKey: 'sebiRegNo' },
+    { header: 'Validity', cell: (row) => fDate(row.validity) },
+    {
+      header: 'Actions',
+      align: 'right', 
+      cell: (row) => (
+        <button onClick={() => handleDelete(row._id)} className="text-red-500 hover:text-red-600 font-medium">
+          Delete
+        </button>
+      )
+    }
+  ];
 
   const handleDelete = async (id: string) => {
     if(!window.confirm("Are you sure?")) return;
@@ -55,48 +79,21 @@ export default function CompaniesDashboard() {
       </div>
 
       {showForm && (
-        <div className="p-6 bg-white dark:bg-gray-900 rounded-xl mb-6 border border-gray-200 dark:border-gray-800">
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm mb-1">Company Name</label><input required className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700" value={formData.companyName} onChange={e => setFormData({...formData, companyName: e.target.value})} /></div>
-            <div><label className="block text-sm mb-1">SEBI Reg No.</label><input required className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700" value={formData.sebiRegNo} onChange={e => setFormData({...formData, sebiRegNo: e.target.value})} /></div>
-            <div><label className="block text-sm mb-1">Email</label><input required type="email" className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
-            <div><label className="block text-sm mb-1">Mobile</label><input required className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700" value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})} /></div>
-            <div><label className="block text-sm mb-1">Validity Date</label><input required type="date" className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700" value={formData.validity} onChange={e => setFormData({...formData, validity: e.target.value})} /></div>
-            <div><label className="block text-sm mb-1">Address</label><input required className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} /></div>
-            <div className="col-span-2 text-right">
-              <button type="submit" className="px-6 py-2 bg-green-500 text-white rounded">Save Company</button>
-            </div>
-          </form>
-        </div>
+        <DynamicForm
+          fields={fields}
+          initialValues={{ companyName: '', sebiRegNo: '', email: '', mobile: '', address: '', validity: '' }}
+          onSubmit={handleSubmit}
+          onCancel={() => setShowForm(false)}
+          submitButtonText="Save Company"
+        />
       )}
 
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full whitespace-nowrap text-left text-sm text-gray-500 dark:text-gray-400">
-            <thead className="bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white">
-              <tr>
-                <th className="px-6 py-4 font-semibold">Company Name</th>
-                <th className="px-6 py-4 font-semibold">SEBI Reg No.</th>
-                <th className="px-6 py-4 font-semibold">Validity</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {companies.map((company: any) => (
-                <tr key={company._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{company.companyName}</td>
-                  <td className="px-6 py-4">{company.sebiRegNo}</td>
-                  <td className="px-6 py-4">{fDate(company.validity)}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button onClick={() => handleDelete(company._id)} className="text-red-500 hover:text-red-600 font-medium">Delete</button>
-                  </td>
-                </tr>
-              ))}
-              {companies.length === 0 && <tr><td colSpan={4} className="text-center py-4">No companies found</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable
+        columns={columns}
+        data={companies}
+        keyExtractor={(row) => row._id}
+        emptyMessage="No companies found"
+      />
     </div>
   );
 }
