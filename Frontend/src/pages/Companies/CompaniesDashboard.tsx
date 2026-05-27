@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
+import { superAdminService } from '../../services/superAdminService';
+import { fDate } from '../../utils/Date_format';
 
 export default function CompaniesDashboard() {
   const [companies, setCompanies] = useState([]);
@@ -8,8 +10,7 @@ export default function CompaniesDashboard() {
 
   const fetchCompanies = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/companies');
-      const data = await res.json();
+      const data = await superAdminService.getCompanies();
       setCompanies(data);
     } catch (err) {
       console.error(err);
@@ -23,16 +24,10 @@ export default function CompaniesDashboard() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:5000/api/companies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (res.ok) {
-        setShowForm(false);
-        setFormData({ companyName: '', sebiRegNo: '', email: '', mobile: '', address: '', validity: '' });
-        fetchCompanies();
-      }
+      await superAdminService.createCompany(formData);
+      setShowForm(false);
+      setFormData({ companyName: '', sebiRegNo: '', email: '', mobile: '', address: '', validity: '' });
+      fetchCompanies();
     } catch (err) {
       console.error(err);
     }
@@ -41,7 +36,7 @@ export default function CompaniesDashboard() {
   const handleDelete = async (id: string) => {
     if(!window.confirm("Are you sure?")) return;
     try {
-      await fetch(`http://localhost:5000/api/companies/${id}`, { method: 'DELETE' });
+      await superAdminService.deleteCompany(id);
       fetchCompanies();
     } catch (err) {
       console.error(err);
@@ -91,7 +86,7 @@ export default function CompaniesDashboard() {
                 <tr key={company._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{company.companyName}</td>
                   <td className="px-6 py-4">{company.sebiRegNo}</td>
-                  <td className="px-6 py-4">{new Date(company.validity).toLocaleDateString()}</td>
+                  <td className="px-6 py-4">{fDate(company.validity)}</td>
                   <td className="px-6 py-4 text-right">
                     <button onClick={() => handleDelete(company._id)} className="text-red-500 hover:text-red-600 font-medium">Delete</button>
                   </td>

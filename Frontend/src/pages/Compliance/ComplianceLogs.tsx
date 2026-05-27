@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
+import { complianceService } from '../../services/complianceService';
+import { fDate } from '../../utils/Date_format';
 
 export default function ComplianceLogs() {
   const [logs, setLogs] = useState([]);
@@ -8,8 +10,7 @@ export default function ComplianceLogs() {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/compliance/company/60d0fe4f5311236168a109ca');
-      const data = await res.json();
+      const data = await complianceService.getLogsByCompany('60d0fe4f5311236168a109ca');
       setLogs(data);
     } catch (err) {
       console.error(err);
@@ -23,15 +24,9 @@ export default function ComplianceLogs() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:5000/api/compliance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (res.ok) {
-        setShowForm(false);
-        fetchLogs();
-      }
+      await complianceService.createLog(formData);
+      setShowForm(false);
+      fetchLogs();
     } catch (err) {
       console.error(err);
     }
@@ -75,7 +70,7 @@ export default function ComplianceLogs() {
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {logs.map((log: any) => (
               <tr key={log._id}>
-                <td className="px-6 py-4">{new Date(log.createdAt).toLocaleDateString()}</td>
+                <td className="px-6 py-4">{fDate(log.createdAt)}</td>
                 <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{log.ruleName}</td>
                 <td className="px-6 py-4">{log.details}</td>
                 <td className="px-6 py-4 font-medium text-red-500">₹{log.penaltyAmount}</td>

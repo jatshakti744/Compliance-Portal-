@@ -4,6 +4,7 @@ import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
+import { authService } from "../../services/authService";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,23 +18,11 @@ export default function SignInForm() {
     e.preventDefault();
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // This is crucial for cookies!
-        body: JSON.stringify({ email, password, rememberMe: isChecked }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        // Token is now securely stored in an HttpOnly cookie by the browser.
-        // We only save the user profile/data to localStorage for UI purposes.
-        localStorage.setItem("user", JSON.stringify(data));
-        navigate("/dashboard");
-      } else {
-        setError(data.message || "Failed to sign in");
-      }
-    } catch {
-      setError("An error occurred. Please try again later.");
+      const data = await authService.login({ email, password, rememberMe: isChecked });
+      localStorage.setItem("user", JSON.stringify(data));
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "An error occurred. Please try again later.");
     }
   };
 
