@@ -29,6 +29,26 @@ export const superAdminService = {
     return res.json();
   },
 
+  updateCompany: async (id: string, data: any) => {
+    const res = await fetch(`${config.base_url}/companies/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Failed to update company");
+    return res.json();
+  },
+
+  toggleCompanyStatus: async (id: string) => {
+    const res = await fetch(`${config.base_url}/companies/${id}/status`, {
+      method: "PUT",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Failed to toggle company status");
+    return res.json();
+  },
+
   deleteCompany: async (id: string) => {
     const res = await fetch(`${config.base_url}/companies/${id}`, {
       method: "DELETE",
