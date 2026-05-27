@@ -3,6 +3,7 @@ const router = express.Router();
 const Company = require('../models/Company');
 const User = require('../models/User');
 const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
 
 // Get all companies
 router.get('/', async (req, res) => {
@@ -47,6 +48,7 @@ router.post('/', async (req, res) => {
       mobile: req.body.mobile,
       address: req.body.address,
       validity: req.body.validity,
+      certificateUrl: req.body.certificateUrl,
       isActive: true
     });
 
@@ -64,10 +66,25 @@ router.post('/', async (req, res) => {
 
     await adminUser.save();
 
-    // Mock sending email
-    console.log(`[EMAIL MOCK] To: ${req.body.email}`);
-    console.log(`[EMAIL MOCK] Subject: Welcome to RAGCP Platform`);
-    console.log(`[EMAIL MOCK] Body: Your company ${req.body.companyName} has been created. Login Email: ${req.body.email}, Password: ${rawPassword}`);
+    // Determine frontend URL dynamically from the request headers
+    const frontendUrl = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:5173';
+
+    // Send actual email using the utility
+    await sendEmail({
+      to: req.body.email,
+      subject: "Welcome to RAGCP Platform - Admin Credentials",
+      html: `
+        <h2>Welcome to RAGCP Platform</h2>
+        <p>Dear Admin,</p>
+        <p>Your RA Entity <strong>${req.body.companyName}</strong> has been successfully registered on the Compliance Portal.</p>
+        <p>Here are your initial login credentials:</p>
+        <p><strong>Login URL:</strong> <a href="${frontendUrl}/signin">${frontendUrl}/signin</a></p>
+        <p><strong>Email:</strong> ${req.body.email}</p>
+        <p><strong>Password:</strong> ${rawPassword}</p>
+        <p>Please login and complete your First Login Wizard setup.</p>
+      `
+    });
+
     console.log(`[AUDIT MOCK] Action: Company Created, ID: ${newCompany._id}, Admin User Created.`);
 
     res.status(201).json({ company: newCompany, message: "Company and Admin User created successfully. Credentials sent to email." });

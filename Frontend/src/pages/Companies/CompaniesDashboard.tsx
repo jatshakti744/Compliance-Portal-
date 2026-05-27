@@ -8,7 +8,7 @@ import { Modal } from '../../components/ui/modal';
 import Alert from '../../components/ui/alert/Alert';
 
 export default function CompaniesDashboard() {
-  const defaultValues = { companyName: '', sebiRegNo: '', email: '', mobile: '', address: '', validity: '' };
+  const defaultValues = { companyName: '', sebiRegNo: '', bseEnrollment: '', email: '', mobile: '', address: '', validity: '', certificateUrl: '' };
   const [formValues, setFormValues] = useState<Record<string, any>>(defaultValues);
   const [editId, setEditId] = useState<string | null>(null);
   const [companies, setCompanies] = useState<any[]>([]);
@@ -95,10 +95,12 @@ export default function CompaniesDashboard() {
   const fields: FormField[] = [
     { name: 'companyName', label: 'Company Name', required: true },
     { name: 'sebiRegNo', label: 'SEBI Reg No.', required: true },
+    { name: 'bseEnrollment', label: 'BSE Enrollment' },
     { name: 'email', label: 'Email', type: 'email', required: true },
     { name: 'mobile', label: 'Mobile', required: true },
     { name: 'validity', label: 'Validity Date', type: 'date', required: true },
     { name: 'address', label: 'Address', required: true },
+    { name: 'certificateUrl', label: 'Certificate URL' },
   ];
 
   const columns: Column<any>[] = [
@@ -136,10 +138,12 @@ export default function CompaniesDashboard() {
     const editValues = {
       companyName: row.companyName || '',
       sebiRegNo: row.sebiRegNo || '',
+      bseEnrollment: row.bseEnrollment || '',
       email: row.email || '',
       mobile: row.mobile || '',
       address: row.address || '',
-      validity: row.validity ? row.validity.split('T')[0] : ''
+      validity: row.validity ? row.validity.split('T')[0] : '',
+      certificateUrl: row.certificateUrl || ''
     };
     setFormValues(editValues);
     setEditId(row._id);
