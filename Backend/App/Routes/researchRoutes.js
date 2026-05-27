@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Research = require('../models/Research');
+const Research = require('../Models/Research');
 
 router.get('/company/:companyId', async (req, res) => {
   try {

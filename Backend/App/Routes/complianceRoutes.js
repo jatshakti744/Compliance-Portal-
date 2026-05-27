@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ComplianceLog = require('../models/ComplianceLog');
+const ComplianceLog = require('../Models/ComplianceLog');
 
 router.get('/company/:companyId', async (req, res) => {
   try {

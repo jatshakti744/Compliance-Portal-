@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../Models/User');
 
 const generateToken = (id, rememberMe = false) => {
   // If rememberMe is true, expire in 5 days, else expire in 8 hours

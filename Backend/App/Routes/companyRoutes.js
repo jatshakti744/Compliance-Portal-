@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const Company = require('../models/Company');
-const User = require('../models/User');
+const Company = require('../Models/Company');
+const User = require('../Models/User');
 const crypto = require('crypto');
-const sendEmail = require('../utils/sendEmail');
+const sendEmail = require('../Utils/sendEmail');
 
 // Get all companies
 router.get('/', async (req, res) => {

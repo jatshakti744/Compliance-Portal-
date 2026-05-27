@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const User = require('../Models/User');
 
 // Get all staff for a company
 router.get('/company/:companyId', async (req, res) => {
