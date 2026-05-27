@@ -27,8 +27,15 @@ const LayoutContent: React.FC = () => {
   );
 };
 
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return null;
+};
+
 const AppLayout: React.FC = () => {
-  const user = localStorage.getItem("user");
+  const user = getCookie("user");
 
   if (!user) {
     return <Navigate to="/signin" replace />;

@@ -19,7 +19,11 @@ export default function SignInForm() {
     setError("");
     try {
       const data = await authService.login({ email, password, rememberMe: isChecked });
-      localStorage.setItem("user", JSON.stringify(data));
+      
+      // Store user in cookie instead of localStorage
+      const maxAge = isChecked ? 5 * 24 * 60 * 60 : 8 * 60 * 60;
+      document.cookie = `user=${encodeURIComponent(JSON.stringify(data))}; path=/; max-age=${maxAge}`;
+      
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message || "An error occurred. Please try again later.");

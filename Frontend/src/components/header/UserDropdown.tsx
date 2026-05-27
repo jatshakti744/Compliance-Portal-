@@ -19,7 +19,8 @@ export default function UserDropdown() {
   const handleLogout = async () => {
     try {
       await authService.logout();
-      localStorage.removeItem("user");
+      document.cookie = "user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      localStorage.removeItem("user"); // Keep this just in case
       navigate("/signin");
     } catch (error) {
       console.error("Error logging out", error);
