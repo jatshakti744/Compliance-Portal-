@@ -1,35 +1,35 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
-import SignIn from "./pages/AuthPages/SignIn";
-import SignUp from "./pages/AuthPages/SignUp";
-import NotFound from "./pages/OtherPage/NotFound";
-import UserProfiles from "./pages/UserProfiles";
-import AppLayout from "./layout/AppLayout";
-import { ScrollToTop } from "./components/common/ScrollToTop";
-import Home from "./pages/Dashboard/Home";
-import LandingPage from "./pages/LandingPage";
-import CompaniesDashboard from "./pages/Companies/CompaniesDashboard";
+import SignIn from "./App/pages/AuthPages/SignIn";
+import SignUp from "./App/pages/AuthPages/SignUp";
+import NotFound from "./App/pages/OtherPage/NotFound";
+import UserProfiles from "./App/pages/UserProfiles";
+import AppLayout from "./App/Layout/AppLayout";
+import { ScrollToTop } from "./App/components/common/ScrollToTop";
+import Home from "./App/pages/Dashboard/Home";
+import LandingPage from "./App/pages/LandingPage";
+import CompaniesDashboard from "./App/pages/Companies/CompaniesDashboard";
 
 // Admin Setup
-import CompanyProfile from "./pages/AdminSetup/CompanyProfile";
-import StaffRoles from "./pages/AdminSetup/StaffRoles";
-import InternalPolicies from "./pages/AdminSetup/InternalPolicies";
+import CompanyProfile from "./App/pages/AdminSetup/CompanyProfile";
+import StaffRoles from "./App/pages/AdminSetup/StaffRoles";
+import InternalPolicies from "./App/pages/AdminSetup/InternalPolicies";
 
 // Client Management
-import OnboardingKYC from "./pages/ClientManagement/OnboardingKYC";
-import Agreements from "./pages/ClientManagement/Agreements";
-import Subscriptions from "./pages/ClientManagement/Subscriptions";
+import OnboardingKYC from "./App/pages/ClientManagement/OnboardingKYC";
+import Agreements from "./App/pages/ClientManagement/Agreements";
+import Subscriptions from "./App/pages/ClientManagement/Subscriptions";
 
 // Research Module
-import PublishCall from "./pages/Research/PublishCall";
-import ManageCalls from "./pages/Research/ManageCalls";
+import PublishCall from "./App/pages/Research/PublishCall";
+import ManageCalls from "./App/pages/Research/ManageCalls";
 
 // Compliance Engine
-import ComplianceLogs from "./pages/Compliance/ComplianceLogs";
-import PenaltyMatrix from "./pages/Compliance/PenaltyMatrix";
+import ComplianceLogs from "./App/pages/Compliance/ComplianceLogs";
+import PenaltyMatrix from "./App/pages/Compliance/PenaltyMatrix";
 
 // Client Portal
-import MySubscriptions from "./pages/ClientPortal/MySubscriptions";
-import ResearchCalls from "./pages/ClientPortal/ResearchCalls";
+import MySubscriptions from "./App/pages/ClientPortal/MySubscriptions";
+import ResearchCalls from "./App/pages/ClientPortal/ResearchCalls";
 
 export default function App() {
   return (
