@@ -17,7 +17,7 @@ export default function Home() {
   
   const userCookie = getCookie("user");
   const user = userCookie ? JSON.parse(decodeURIComponent(userCookie)) : null;
-  const isSuperAdmin = user?.role === 'SuperAdmin';
+  const isSuperAdmin = user?.role === 'Super Admin';
 
   useEffect(() => {
     if (isSuperAdmin) {
