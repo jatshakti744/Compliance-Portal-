@@ -4,6 +4,7 @@ import { superAdminService } from '../../services/superAdminService';
 import { fDate } from '../../utils/Date_format';
 import DynamicForm, { FormField } from '../../components/common/DynamicForm';
 import DataTable, { Column } from '../../components/common/DataTable';
+import { Modal } from '../../components/ui/modal';
 
 export default function CompaniesDashboard() {
   const defaultValues = { companyName: '', sebiRegNo: '', email: '', mobile: '', address: '', validity: '' };
@@ -11,6 +12,13 @@ export default function CompaniesDashboard() {
   const [editId, setEditId] = useState<string | null>(null);
   const [companies, setCompanies] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'create' | 'update' | 'delete' | 'toggle';
+    id?: string;
+    data?: any;
+    resetForm?: () => void;
+    message: string;
+  } | null>(null);
   
   // Pagination & Search State
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,20 +46,37 @@ export default function CompaniesDashboard() {
     fetchCompanies();
   }, [currentPage, limit, searchTerm]);
 
-  const handleSubmit = async (data: Record<string, any>, resetForm: () => void) => {
+  const handleSubmit = (data: Record<string, any>, resetForm: () => void) => {
+    if (editId) {
+      setConfirmAction({ type: 'update', id: editId, data, resetForm, message: 'Are you sure you want to update this company details?' });
+    } else {
+      setConfirmAction({ type: 'create', data, resetForm, message: 'Are you sure you want to create this new company?' });
+    }
+  };
+
+  const executeAction = async () => {
+    if (!confirmAction) return;
     try {
-      if (editId) {
-        await superAdminService.updateCompany(editId, data);
-      } else {
-        await superAdminService.createCompany(data);
+      if (confirmAction.type === 'create') {
+        await superAdminService.createCompany(confirmAction.data);
+        setShowForm(false);
+        confirmAction.resetForm?.();
+      } else if (confirmAction.type === 'update') {
+        await superAdminService.updateCompany(confirmAction.id!, confirmAction.data);
+        setShowForm(false);
+        setEditId(null);
+        setFormValues(defaultValues);
+        confirmAction.resetForm?.();
+      } else if (confirmAction.type === 'delete') {
+        await superAdminService.deleteCompany(confirmAction.id!);
+      } else if (confirmAction.type === 'toggle') {
+        await superAdminService.toggleCompanyStatus(confirmAction.id!);
       }
-      setShowForm(false);
-      setEditId(null);
-      setFormValues(defaultValues);
-      resetForm();
       fetchCompanies();
+      setConfirmAction(null);
     } catch (err) {
       console.error(err);
+      alert('Action failed. Please try again.');
     }
   };
 
@@ -109,24 +134,12 @@ export default function CompaniesDashboard() {
     setShowForm(true);
   };
 
-  const handleToggleStatus = async (id: string) => {
-    if(!window.confirm("Are you sure you want to toggle the status?")) return;
-    try {
-      await superAdminService.toggleCompanyStatus(id);
-      fetchCompanies();
-    } catch (err) {
-      console.error(err);
-    }
+  const handleToggleStatus = (id: string) => {
+    setConfirmAction({ type: 'toggle', id, message: 'Are you sure you want to change the active status of this company?' });
   };
 
-  const handleDelete = async (id: string) => {
-    if(!window.confirm("Are you sure?")) return;
-    try {
-      await superAdminService.deleteCompany(id);
-      fetchCompanies();
-    } catch (err) {
-      console.error(err);
-    }
+  const handleDelete = (id: string) => {
+    setConfirmAction({ type: 'delete', id, message: 'Are you sure you want to permanently delete this company? This action cannot be undone.' });
   };
 
   return (
@@ -177,6 +190,44 @@ export default function CompaniesDashboard() {
           setCurrentPage(1); // Reset to first page on search
         }}
       />
+
+      <Modal
+        isOpen={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+        className="max-w-md p-6"
+      >
+        <div className="text-center">
+          <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${confirmAction?.type === 'delete' ? 'bg-red-100' : 'bg-brand-100'} mb-4`}>
+            {confirmAction?.type === 'delete' ? (
+              <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            ) : (
+              <svg className="h-6 w-6 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Confirm Action</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            {confirmAction?.message}
+          </p>
+          <div className="flex justify-center gap-3">
+            <button
+              onClick={() => setConfirmAction(null)}
+              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={executeAction}
+              className={`px-4 py-2 text-white rounded-lg transition-colors ${confirmAction?.type === 'delete' ? 'bg-red-500 hover:bg-red-600' : 'bg-brand-500 hover:bg-brand-600'}`}
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
