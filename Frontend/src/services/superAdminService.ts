@@ -1,8 +1,16 @@
 import { config } from "../utils/config";
 
 export const superAdminService = {
-  getCompanies: async () => {
-    const res = await fetch(`${config.base_url}/companies`, {
+  getCompanies: async (params?: { page?: number; limit?: number; search?: string }) => {
+    let url = `${config.base_url}/companies`;
+    if (params) {
+      const queryParams = new URLSearchParams();
+      if (params.page) queryParams.append('page', params.page.toString());
+      if (params.limit) queryParams.append('limit', params.limit.toString());
+      if (params.search) queryParams.append('search', params.search);
+      if (queryParams.toString()) url += `?${queryParams.toString()}`;
+    }
+    const res = await fetch(url, {
       method: "GET",
       credentials: "include",
     });

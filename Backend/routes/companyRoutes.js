@@ -5,8 +5,30 @@ const Company = require('../models/Company');
 // Get all companies
 router.get('/', async (req, res) => {
   try {
-    const companies = await Company.find();
-    res.json(companies);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { companyName: { $regex: search, $options: 'i' } },
+        { sebiRegNo: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const totalCount = await Company.countDocuments(query);
+    const companies = await Company.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    res.json({
+      data: companies,
+      totalCount,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / limit)
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

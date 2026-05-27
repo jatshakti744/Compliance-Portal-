@@ -6,13 +6,26 @@ import DynamicForm, { FormField } from '../../components/common/DynamicForm';
 import DataTable, { Column } from '../../components/common/DataTable';
 
 export default function CompaniesDashboard() {
-  const [companies, setCompanies] = useState([]);
+  const [companies, setCompanies] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  
+  // Pagination & Search State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchCompanies = async () => {
     try {
-      const data = await superAdminService.getCompanies();
-      setCompanies(data);
+      const response = await superAdminService.getCompanies({ page: currentPage, limit, search: searchTerm });
+      // Depending on backend structure, data might be nested:
+      if (response.data && Array.isArray(response.data)) {
+        setCompanies(response.data);
+        setTotalCount(response.totalCount || response.total || response.data.length);
+      } else {
+        setCompanies(Array.isArray(response) ? response : []);
+        setTotalCount(Array.isArray(response) ? response.length : 0);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -20,7 +33,7 @@ export default function CompaniesDashboard() {
 
   useEffect(() => {
     fetchCompanies();
-  }, []);
+  }, [currentPage, limit, searchTerm]);
 
   const handleSubmit = async (data: Record<string, any>, resetForm: () => void) => {
     try {
@@ -93,6 +106,19 @@ export default function CompaniesDashboard() {
         data={companies}
         keyExtractor={(row) => row._id}
         emptyMessage="No companies found"
+        exportFileName="Companies_List"
+        totalCount={totalCount}
+        currentPage={currentPage}
+        limit={limit}
+        onPageChange={(page) => setCurrentPage(page)}
+        onLimitChange={(newLimit) => {
+          setLimit(newLimit);
+          setCurrentPage(1); // Reset to first page
+        }}
+        onSearch={(term) => {
+          setSearchTerm(term);
+          setCurrentPage(1); // Reset to first page on search
+        }}
       />
     </div>
   );
