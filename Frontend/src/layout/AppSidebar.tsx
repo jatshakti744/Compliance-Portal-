@@ -23,22 +23,33 @@ type NavItem = {
   icon: React.ReactNode;
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  roles?: string[];
+};
+
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return null;
 };
 
 const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    path: "/dashboard"
+    path: "/dashboard",
+    roles: ["Super Admin", "Admin", "Principal Officer", "Compliance Officer", "Researcher", "Staff", "Client"]
   },
   {
     icon: <UserCircleIcon />,
     name: "Companies (Super Admin)",
-    path: "/companies"
+    path: "/companies",
+    roles: ["Super Admin"]
   },
   {
     icon: <CalenderIcon />,
     name: "Admin Setup",
+    roles: ["Admin", "Principal Officer"],
     subItems: [
       { name: "Company Profile", path: "/admin/profile" },
       { name: "Staff & Roles", path: "/admin/staff" },
@@ -48,6 +59,7 @@ const navItems: NavItem[] = [
   {
     name: "Client Management",
     icon: <ListIcon />,
+    roles: ["Admin", "Principal Officer", "Staff"],
     subItems: [
       { name: "Onboarding & KYC", path: "/clients/onboarding" },
       { name: "Agreements", path: "/clients/agreements" },
@@ -57,6 +69,7 @@ const navItems: NavItem[] = [
   {
     name: "Research Module",
     icon: <TableIcon />,
+    roles: ["Admin", "Principal Officer", "Researcher"],
     subItems: [
       { name: "Publish Call", path: "/research/publish" },
       { name: "Manage Calls", path: "/research/manage" }
@@ -65,9 +78,19 @@ const navItems: NavItem[] = [
   {
     name: "Compliance Engine",
     icon: <PageIcon />,
+    roles: ["Admin", "Principal Officer", "Compliance Officer"],
     subItems: [
       { name: "Compliance Logs", path: "/compliance/logs" },
       { name: "Penalty Matrix", path: "/compliance/matrix" }
+    ],
+  },
+  {
+    name: "Client Portal",
+    icon: <PageIcon />,
+    roles: ["Client"],
+    subItems: [
+      { name: "My Subscriptions", path: "/client/subscriptions" },
+      { name: "Research Calls", path: "/client/research-calls" }
     ],
   },
 ];
@@ -102,10 +125,17 @@ const AppSidebar: React.FC = () => {
     [location.pathname]
   );
 
+  const userCookie = getCookie("user");
+  const user = userCookie ? JSON.parse(decodeURIComponent(userCookie)) : null;
+  const userRole = user?.role || "Client";
+
+  const filteredNavItems = navItems.filter(item => !item.roles || item.roles.includes(userRole));
+  const filteredOthersItems = othersItems.filter(item => !item.roles || item.roles.includes(userRole));
+
   useEffect(() => {
     let submenuMatched = false;
     ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? navItems : othersItems;
+      const items = menuType === "main" ? filteredNavItems : filteredOthersItems;
       items.forEach((nav, index) => {
         if (nav.subItems) {
           nav.subItems.forEach((subItem) => {
@@ -339,7 +369,7 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots className="size-6" />
                 )}
               </h2>
-              {renderMenuItems(navItems, "main")}
+              {renderMenuItems(filteredNavItems, "main")}
             </div>
             <div className="">
               <h2
@@ -355,7 +385,7 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots />
                 )}
               </h2>
-              {renderMenuItems(othersItems, "others")}
+              {renderMenuItems(filteredOthersItems, "others")}
             </div>
           </div>
         </nav>

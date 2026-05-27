@@ -27,6 +27,10 @@ import ManageCalls from "./pages/Research/ManageCalls";
 import ComplianceLogs from "./pages/Compliance/ComplianceLogs";
 import PenaltyMatrix from "./pages/Compliance/PenaltyMatrix";
 
+// Client Portal
+import MySubscriptions from "./pages/ClientPortal/MySubscriptions";
+import ResearchCalls from "./pages/ClientPortal/ResearchCalls";
+
 export default function App() {
   return (
     <>
@@ -57,6 +61,9 @@ export default function App() {
             {/* Compliance Engine */}
             <Route path="/compliance/logs" element={<ComplianceLogs />} />
             <Route path="/compliance/matrix" element={<PenaltyMatrix />} />
+            {/* Client Portal (For end-users) */}
+            <Route path="/client/subscriptions" element={<MySubscriptions />} />
+            <Route path="/client/research-calls" element={<ResearchCalls />} />
           </Route>
 
           {/* Auth Layout */}
