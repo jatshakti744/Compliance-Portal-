@@ -20,11 +20,13 @@ export default function SignInForm() {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // This is crucial for cookies!
         body: JSON.stringify({ email, password, rememberMe: isChecked }),
       });
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem("token", data.token);
+        // Token is now securely stored in an HttpOnly cookie by the browser.
+        // We only save the user profile/data to localStorage for UI purposes.
         localStorage.setItem("user", JSON.stringify(data));
         navigate("/dashboard");
       } else {

@@ -7,6 +7,16 @@ const generateToken = (id, rememberMe = false) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn });
 };
 
+const setTokenCookie = (res, token, rememberMe) => {
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: rememberMe ? 5 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000 // 5 days or 8 hours in ms
+  };
+  res.cookie('token', token, options);
+};
+
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
@@ -22,12 +32,13 @@ exports.registerUser = async (req, res) => {
     const user = await User.create({ name, email, password, role });
 
     if (user) {
+      const token = generateToken(user._id, false);
+      setTokenCookie(res, token, false);
       res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,
-        token: generateToken(user._id),
+        role: user.role
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -47,12 +58,13 @@ exports.loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      const token = generateToken(user._id, rememberMe);
+      setTokenCookie(res, token, rememberMe);
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,
-        token: generateToken(user._id, rememberMe),
+        role: user.role
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
@@ -60,4 +72,15 @@ exports.loginUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+// @desc    Logout user / clear cookie
+// @route   POST /api/auth/logout
+// @access  Public
+exports.logoutUser = (req, res) => {
+  res.cookie('token', '', {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({ message: 'Logged out successfully' });
 };
