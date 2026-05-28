@@ -154,3 +154,41 @@ exports.getClientResearchCalls = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getDashboardData = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const client = await Client.findOne({ user: userId });
+    
+    if (!client) return res.status(404).json({ message: "Client profile not found." });
+
+    let totalCalls = 0;
+    let recentCalls = [];
+    
+    if (client.subscriptionActive) {
+      const Research = require('../Models/Research');
+      totalCalls = await Research.countDocuments({ companyId: client.companyId, status: 'Published' });
+      recentCalls = await Research.find({ companyId: client.companyId, status: 'Published' })
+                                  .sort({ createdAt: -1 })
+                                  .limit(3);
+    }
+
+    let daysLeft = 0;
+    if (client.subscriptionActive && client.subscriptionExpiry) {
+      const diff = new Date(client.subscriptionExpiry).getTime() - new Date().getTime();
+      daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    }
+
+    res.json({
+      kycStatus: client.kycStatus,
+      kraStatus: client.kraStatus,
+      subscriptionActive: client.subscriptionActive,
+      subscriptionPlan: client.subscriptionPlan,
+      daysLeft,
+      totalCalls,
+      recentCalls
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

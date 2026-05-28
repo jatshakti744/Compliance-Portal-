@@ -107,6 +107,71 @@ export default function Home() {
     );
   }
 
+  // If the user is a Client, render the Client Dashboard
+  if (user?.role === 'Client') {
+    return (
+      <>
+        <PageMeta title="Client Dashboard | RAGCP" description="Your Dashboard" />
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Welcome Back!</h2>
+          <p className="text-gray-500 text-sm">Here is your subscription and research overview.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Subscription Status</h3>
+            <p className={`text-2xl font-bold ${data?.subscriptionActive ? 'text-green-600' : 'text-red-500'}`}>
+              {data?.subscriptionActive ? 'Active' : 'Inactive'}
+            </p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Days Remaining</h3>
+            <p className="text-3xl font-bold text-blue-600">{data?.daysLeft || 0}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Available Calls</h3>
+            <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.totalCalls || 0}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">KYC Status</h3>
+            <p className={`text-xl font-bold mt-1 ${data?.kycStatus === 'Verified' ? 'text-green-600' : 'text-orange-500'}`}>
+              {data?.kycStatus || 'Pending'}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Recent Research Calls</h3>
+          {data?.recentCalls && data.recentCalls.length > 0 ? (
+            <div className="space-y-4">
+              {data.recentCalls.map((call: any) => (
+                <div key={call._id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                  <div>
+                    <span className={`inline-block px-2 py-1 rounded text-xs font-bold mb-1 ${
+                      call.type === 'Buy' ? 'bg-green-100 text-green-700' : 
+                      call.type === 'Sell' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                    }`}>{call.type}</span>
+                    <h4 className="font-bold text-gray-800 dark:text-white">{call.title}</h4>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-500">Target: <strong className="text-green-600">₹{call.targetPrice}</strong></p>
+                    <a href="/client/research-calls" className="text-brand-500 text-sm font-medium hover:underline">View Details</a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-8 text-center text-gray-500">
+              {!data?.subscriptionActive 
+                ? "Please activate your subscription to view recent calls." 
+                : "No recent calls available."}
+            </div>
+          )}
+        </div>
+      </>
+    );
+  }
+
   const candlestickOptions: any = {
     chart: { type: 'candlestick', height: 350, toolbar: { show: false } },
     title: { text: 'Research Analytics Performance', align: 'left' },

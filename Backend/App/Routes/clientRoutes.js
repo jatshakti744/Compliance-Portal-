@@ -11,5 +11,6 @@ router.put('/:id', clientController.updateClient);
 router.post('/complete-onboarding', clientController.completeOnboarding);
 router.get('/my-profile', clientController.getMyProfile);
 router.get('/research-calls', clientController.getClientResearchCalls);
+router.get('/dashboard', clientController.getDashboardData);
 
 module.exports = router;

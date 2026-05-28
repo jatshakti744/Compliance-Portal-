@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
 import PageMeta from '../../components/common/PageMeta';
-import { config } from '../../utils/config';
 import Alert from '../../components/ui/alert/Alert';
-
-const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-  return null;
-};
+import { clientService } from '../../Services/clientService';
 
 export default function ClientOnboardingWizard() {
   const navigate = useNavigate();
@@ -64,26 +57,11 @@ export default function ClientOnboardingWizard() {
     
     setLoading(true);
     try {
-      const userCookie = getCookie("user");
-      const user = userCookie ? JSON.parse(decodeURIComponent(userCookie)) : null;
-      if (!user) throw new Error("Not authenticated");
-
-      // Mock API call to update client profile
-      const res = await fetch(`${config.base_url}/client/complete-onboarding`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          kycData,
-          agreementsSigned: true,
-          subscriptionPlan: selectedPlan
-        })
+      await clientService.completeOnboarding({
+        kycData,
+        agreementsSigned: true,
+        subscriptionPlan: selectedPlan
       });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || "Failed to complete onboarding");
-      }
 
       showToast("success", "Onboarding Complete", "Your profile setup has been completed successfully!");
       setTimeout(() => {
