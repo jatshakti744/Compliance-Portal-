@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
+import { complianceService } from '../../services/complianceService';
 
 export default function PenaltyMatrix() {
-  const [matrix] = useState([
-    { id: 1, req: "SEBI registration mandatory", freq: "Before commencement", penalty: "Heavy Penalty / Block" },
-    { id: 2, req: "Minimum qualification requirements for RA", freq: "At appointment", penalty: "₹10,000 per violation" },
-    { id: 3, req: "Mandatory NISM certifications", freq: "Before acting as RA", penalty: "Block Onboarding" },
-    { id: 4, req: "Designation of Principal Officer", freq: "Continuous compliance", penalty: "₹5,000 per violation" },
-    { id: 5, req: "Appointment of Compliance Officer", freq: "Continuous compliance", penalty: "₹20,000" },
-    { id: 6, req: "Part-time RA client limit ≤75", freq: "Continuous compliance", penalty: "₹10,000 per violation" },
-    { id: 7, req: "Terms and conditions disclosure", freq: "Before onboarding", penalty: "₹1,000 per client" }
-  ]);
+  const [matrix, setMatrix] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMatrix = async () => {
+      try {
+        const data = await complianceService.getPenaltyMatrix();
+        setMatrix(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMatrix();
+  }, []);
 
   return (
     <div>
@@ -31,9 +39,11 @@ export default function PenaltyMatrix() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {matrix.map((row) => (
-              <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                <td className="px-6 py-4 font-medium dark:text-white">{row.id}</td>
+            {loading ? (
+              <tr><td colSpan={4} className="text-center py-8"><div className="inline-block w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div></td></tr>
+            ) : matrix.map((row, index) => (
+              <tr key={row._id || index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                <td className="px-6 py-4 font-medium dark:text-white">{index + 1}</td>
                 <td className="px-6 py-4 whitespace-normal min-w-[300px]">{row.req}</td>
                 <td className="px-6 py-4">{row.freq}</td>
                 <td className="px-6 py-4 font-medium text-red-500 dark:text-red-400">{row.penalty}</td>

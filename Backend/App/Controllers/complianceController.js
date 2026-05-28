@@ -30,3 +30,29 @@ exports.createComplianceLog = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+exports.getPenaltyMatrix = async (req, res) => {
+  try {
+    const PenaltyRule = require('../Models/PenaltyRule');
+    const rules = await PenaltyRule.find({});
+    
+    // Auto-seed if empty
+    if (rules.length === 0) {
+      const defaultRules = [
+        { req: "SEBI registration mandatory", freq: "Before commencement", penalty: "Heavy Penalty / Block" },
+        { req: "Minimum qualification requirements for RA", freq: "At appointment", penalty: "₹10,000 per violation" },
+        { req: "Mandatory NISM certifications", freq: "Before acting as RA", penalty: "Block Onboarding" },
+        { req: "Designation of Principal Officer", freq: "Continuous compliance", penalty: "₹5,000 per violation" },
+        { req: "Appointment of Compliance Officer", freq: "Continuous compliance", penalty: "₹20,000" },
+        { req: "Part-time RA client limit ≤75", freq: "Continuous compliance", penalty: "₹10,000 per violation" },
+        { req: "Terms and conditions disclosure", freq: "Before onboarding", penalty: "₹1,000 per client" }
+      ];
+      await PenaltyRule.insertMany(defaultRules);
+      return res.json(defaultRules);
+    }
+    
+    res.json(rules);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

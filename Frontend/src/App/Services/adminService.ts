@@ -68,5 +68,25 @@ export const adminService = {
       throw new Error(err.message || "Failed to create staff");
     }
     return res.json();
+  },
+
+  getCompanyProfile: async () => {
+    const res = await fetch(`${config.base_url}/admin/company/profile`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Failed to fetch company profile");
+    return res.json();
+  },
+
+  updateCompanyProfile: async (data: any) => {
+    const res = await fetch(`${config.base_url}/admin/company/profile`, {
+      method: "PUT",
+      headers: { 'Content-Type': 'application/json' },
+      credentials: "include",
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error("Failed to update company profile");
+    return res.json();
   }
 };

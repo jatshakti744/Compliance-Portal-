@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import { researchService } from '../../Services/researchService';
 import Alert from '../../components/ui/alert/Alert';
@@ -16,11 +16,27 @@ export default function PublishCall() {
   const [published, setPublished] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ variant: "success" | "error" | "warning", title: string, message: string } | null>(null);
+  const [recentCalls, setRecentCalls] = useState<any[]>([]);
 
   const showToast = (variant: "success" | "error" | "warning", title: string, message: string) => {
     setToast({ variant, title, message });
     setTimeout(() => setToast(null), 4000);
   };
+
+  const fetchRecentCalls = async () => {
+    try {
+      const data = await researchService.getResearchCalls();
+      if (Array.isArray(data)) {
+        setRecentCalls(data.slice(0, 3)); // Only show top 3 recent
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecentCalls();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +50,7 @@ export default function PublishCall() {
       showToast("success", "Research Published", "Successfully published! Clients have been notified via Email.");
       setPublished(true);
       setFormData({ type: 'Buy', title: '', content: '', targetPrice: '', stopLoss: '', tncAccepted: false, conflictOfInterest: false });
+      fetchRecentCalls(); // Refresh the recent calls list
       setTimeout(() => setPublished(false), 3000);
     } catch (err: any) {
       showToast("error", "Action Failed", err.message || "Failed to publish research call.");
@@ -107,6 +124,24 @@ export default function PublishCall() {
           </div>
         </form>
       </div>
+
+      {recentCalls.length > 0 && (
+        <div className="max-w-3xl mx-auto mt-8 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Recently Published Calls</h2>
+          <div className="space-y-4">
+            {recentCalls.map(c => (
+              <div key={c._id} className="p-4 border border-gray-100 dark:border-gray-800 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-semibold text-gray-800 dark:text-white">{c.title}</h3>
+                  <span className={`px-2 py-1 rounded text-xs ${c.type === 'Buy' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{c.type}</span>
+                </div>
+                <div className="text-sm text-gray-500 mb-2">Target: ₹{c.targetPrice} | Stop Loss: ₹{c.stopLoss}</div>
+                <div className="text-xs text-gray-400">Published on {new Date(c.createdAt).toLocaleString()}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {toast && (
         <div className="fixed bottom-6 right-6 z-[999999] shadow-xl rounded-xl transition-all duration-300">

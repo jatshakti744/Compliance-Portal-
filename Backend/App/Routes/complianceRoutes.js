@@ -5,6 +5,7 @@ const { protect } = require('../../middlewares/authMiddleware');
 
 router.use(protect);
 
+router.get('/matrix', complianceController.getPenaltyMatrix);
 router.get('/', complianceController.getComplianceLogsByCompany);
 router.post('/', complianceController.createComplianceLog);
 

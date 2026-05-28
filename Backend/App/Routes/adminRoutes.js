@@ -10,4 +10,7 @@ router.get('/dashboard', adminController.getDashboardData);
 router.get('/staff', adminController.getStaffList);
 router.post('/staff', adminController.createStaff);
 
+router.get('/company/profile', adminController.getMyCompany);
+router.put('/company/profile', adminController.updateMyCompany);
+
 module.exports = router;

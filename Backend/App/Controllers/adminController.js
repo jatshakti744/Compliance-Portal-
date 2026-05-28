@@ -73,3 +73,34 @@ exports.createStaff = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+exports.getMyCompany = async (req, res) => {
+  try {
+    const companyId = req.user.companyId;
+    if (!companyId) return res.status(403).json({ message: "Access denied." });
+    const company = await Company.findById(companyId);
+    res.json(company);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.updateMyCompany = async (req, res) => {
+  try {
+    const companyId = req.user.companyId;
+    if (!companyId) return res.status(403).json({ message: "Access denied." });
+    const company = await Company.findByIdAndUpdate(companyId, req.body, { new: true });
+    
+    const ComplianceLog = require('../Models/ComplianceLog');
+    await ComplianceLog.create({
+      companyId,
+      action: 'COMPANY_PROFILE_UPDATED',
+      performedBy: req.user._id,
+      details: `Updated company profile information`
+    });
+
+    res.json({ message: "Profile updated successfully", company });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
