@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import PageMeta from "../../components/common/PageMeta";
 import { clientService } from "../../Services/clientService";
 import { superAdminService } from "../../Services/superAdminService";
+import { adminService } from "../../Services/adminService";
 import DataTable from "../../components/common/DataTable";
 
 const getCookie = (name: string) => {
@@ -26,8 +27,7 @@ export default function Home() {
         .then(res => setCompanies(res.data))
         .catch(console.error);
     } else if (isAdmin) {
-      // Mock Admin Dashboard Data for now until backend is ready
-      setData({ clients: 120, subscriptions: 85, pending: 12, alerts: 2 });
+      adminService.getDashboardData().then(setData).catch(console.error);
     } else {
       clientService.getDashboardData().then(setData).catch(console.error);
     }

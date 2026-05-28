@@ -22,5 +22,14 @@ export const adminService = {
     });
     if (!res.ok) throw new Error("Failed to upload CAMS file");
     return res.json();
+  },
+
+  getDashboardData: async () => {
+    const res = await fetch(`${config.base_url}/admin/dashboard`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Failed to fetch admin dashboard data");
+    return res.json();
   }
 };

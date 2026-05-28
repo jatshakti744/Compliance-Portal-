@@ -22,6 +22,7 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
+app.use('/api/admin', require('./App/Routes/adminRoutes'));
 app.use('/api/users', require('./App/Routes/userRoutes'));
 app.use('/api/clients', require('./App/Routes/clientRoutes'));
 app.use('/api/research', require('./App/Routes/researchRoutes'));
