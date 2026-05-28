@@ -58,6 +58,13 @@ exports.loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      let profileCompleted = false;
+      if (user.companyId) {
+        const Company = require('../Models/Company');
+        const company = await Company.findById(user.companyId);
+        if (company) profileCompleted = company.profileCompleted;
+      }
+
       const token = generateToken(user._id, rememberMe);
       setTokenCookie(res, token, rememberMe);
       res.json({
@@ -65,7 +72,8 @@ exports.loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        companyId: user.companyId
+        companyId: user.companyId,
+        profileCompleted
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });

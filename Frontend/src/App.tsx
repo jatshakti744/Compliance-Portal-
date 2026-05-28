@@ -13,6 +13,7 @@ import CompaniesDashboard from "./App/pages/Companies/CompaniesDashboard";
 import CompanyProfile from "./App/pages/AdminSetup/CompanyProfile";
 import StaffRoles from "./App/pages/AdminSetup/StaffRoles";
 import InternalPolicies from "./App/pages/AdminSetup/InternalPolicies";
+import AdminSetupWizard from "./App/pages/AdminSetup/AdminSetupWizard";
 
 // Client Management
 import OnboardingKYC from "./App/pages/ClientManagement/OnboardingKYC";
@@ -45,6 +46,7 @@ export default function App() {
             <Route path="/companies" element={<CompaniesDashboard />} />
             
             {/* Admin Setup */}
+            <Route path="/admin/setup" element={<AdminSetupWizard />} />
             <Route path="/admin/profile" element={<CompanyProfile />} />
             <Route path="/admin/staff" element={<StaffRoles />} />
             <Route path="/admin/policies" element={<InternalPolicies />} />

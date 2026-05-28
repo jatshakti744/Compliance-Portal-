@@ -18,16 +18,20 @@ export default function Home() {
   const userCookie = getCookie("user");
   const user = userCookie ? JSON.parse(decodeURIComponent(userCookie)) : null;
   const isSuperAdmin = user?.role === 'Super Admin';
+  const isAdmin = user?.role === 'Admin';
 
   useEffect(() => {
     if (isSuperAdmin) {
       superAdminService.getCompanies({ limit: 100 })
         .then(res => setCompanies(res.data))
         .catch(console.error);
+    } else if (isAdmin) {
+      // Mock Admin Dashboard Data for now until backend is ready
+      setData({ clients: 120, subscriptions: 85, pending: 12, alerts: 2 });
     } else {
       clientService.getDashboardData().then(setData).catch(console.error);
     }
-  }, [isSuperAdmin]);
+  }, [isSuperAdmin, isAdmin]);
 
   const recentCompanies = companies.slice(0, 5); // Just show top 5
 
@@ -108,19 +112,19 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Clients</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">--</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.clients || '--'}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Active Subscriptions</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">--</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.subscriptions || '--'}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Pending KYC</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">--</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.pending || '--'}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Compliance Alerts</h3>
-          <p className="text-3xl font-bold text-red-500">--</p>
+          <p className="text-3xl font-bold text-red-500">{data?.alerts || '--'}</p>
         </div>
       </div>
 

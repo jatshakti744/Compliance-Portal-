@@ -13,6 +13,7 @@ import {
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
+import Alert from "../components/ui/alert/Alert";
 
 type NavItem = {
   name: string;
@@ -110,11 +111,26 @@ const AppSidebar: React.FC = () => {
     [location.pathname]
   );
 
+  const [toast, setToast] = useState<{ variant: "success" | "error" | "warning", title: string, message: string } | null>(null);
+
+  const showToast = (variant: "success" | "error" | "warning", title: string, message: string) => {
+    setToast({ variant, title, message });
+    setTimeout(() => setToast(null), 4000);
+  };
+
   const userCookie = getCookie("user");
   const user = userCookie ? JSON.parse(decodeURIComponent(userCookie)) : null;
   const userRole = user?.role || "Client";
+  const isProfileIncomplete = user?.role === 'Admin' && (user.profileCompleted === false || user.profileCompleted === undefined);
 
   const filteredNavItems = navItems.filter(item => !item.roles || item.roles.includes(userRole));
+
+  const handleLinkClick = (e: React.MouseEvent, path: string) => {
+    if (isProfileIncomplete && path !== '/admin/setup') {
+      e.preventDefault();
+      showToast("error", "Access Denied", "Please complete your First Login Setup first before accessing other modules.");
+    }
+  };
 
   useEffect(() => {
     let submenuMatched = false;
@@ -151,6 +167,10 @@ const AppSidebar: React.FC = () => {
   }, [openSubmenu]);
 
   const handleSubmenuToggle = (index: number, menuType: "main") => {
+    if (isProfileIncomplete) {
+      showToast("error", "Access Denied", "Please complete your First Login Setup first before accessing other modules.");
+      return;
+    }
     setOpenSubmenu((prevOpenSubmenu) => {
       if (
         prevOpenSubmenu &&
@@ -207,6 +227,7 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 to={nav.path}
+                onClick={(e) => handleLinkClick(e, nav.path!)}
                 className={`menu-item group ${
                   isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                 }`}
@@ -244,6 +265,7 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.name}>
                     <Link
                       to={subItem.path}
+                      onClick={(e) => handleLinkClick(e, subItem.path)}
                       className={`menu-dropdown-item ${
                         isActive(subItem.path)
                           ? "menu-dropdown-item-active"
@@ -356,6 +378,11 @@ const AppSidebar: React.FC = () => {
           </div>
         </nav>
       </div>
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[999999] shadow-xl rounded-xl transition-all duration-300">
+          <Alert variant={toast.variant as any} title={toast.title} message={toast.message} />
+        </div>
+      )}
     </aside>
   );
 };

@@ -3,11 +3,18 @@ import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { useNavigate } from "react-router";
 import { authService } from "../../services/authService";
+import Alert from "../ui/alert/Alert";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
+  const [toast, setToast] = useState<{ variant: "success" | "error" | "warning", title: string, message: string } | null>(null);
+
+  const showToast = (variant: "success" | "error" | "warning", title: string, message: string) => {
+    setToast({ variant, title, message });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   useEffect(() => {
     const userCookie = document.cookie
@@ -39,6 +46,18 @@ export default function UserDropdown() {
       navigate("/signin");
     } catch (error) {
       console.error("Error logging out", error);
+    }
+  };
+
+  const isProfileIncomplete = user?.role === 'Admin' && (user.profileCompleted === false || user.profileCompleted === undefined);
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    if (isProfileIncomplete) {
+      e.preventDefault();
+      showToast("error", "Action Restricted", "Please complete your First Login Setup first before accessing other modules.");
+      closeDropdown();
+    } else {
+      closeDropdown();
     }
   };
   return (
@@ -93,7 +112,7 @@ export default function UserDropdown() {
         <ul className="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
           <li>
             <DropdownItem
-              onItemClick={closeDropdown}
+              onItemClick={handleLinkClick}
               tag="a"
               to="/profile"
               className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
@@ -118,7 +137,7 @@ export default function UserDropdown() {
           </li>
           <li>
             <DropdownItem
-              onItemClick={closeDropdown}
+              onItemClick={handleLinkClick}
               tag="a"
               to="/profile"
               className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
@@ -143,7 +162,7 @@ export default function UserDropdown() {
           </li>
           <li>
             <DropdownItem
-              onItemClick={closeDropdown}
+              onItemClick={handleLinkClick}
               tag="a"
               to="/profile"
               className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
@@ -189,6 +208,12 @@ export default function UserDropdown() {
           Sign out
         </button>
       </Dropdown>
+      
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[999999] shadow-xl rounded-xl transition-all duration-300">
+          <Alert variant={toast.variant as any} title={toast.title} message={toast.message} />
+        </div>
+      )}
     </div>
   );
 }

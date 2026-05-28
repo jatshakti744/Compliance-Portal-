@@ -132,3 +132,62 @@ exports.deleteCompany = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.setupAdminProfile = async (req, res) => {
+  try {
+    const companyId = req.params.id;
+    const { principalOfficer, complianceOfficer, policies } = req.body;
+
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    // Generate random passwords
+    const poPassword = crypto.randomBytes(6).toString('hex');
+    const coPassword = crypto.randomBytes(6).toString('hex');
+
+    // Create Principal Officer
+    const poUser = new User({
+      name: principalOfficer.name,
+      email: principalOfficer.email,
+      password: poPassword,
+      role: 'Principal Officer',
+      companyId: companyId,
+      nismCertificateNumber: principalOfficer.nismCertificateNumber,
+      nismExpiryDate: principalOfficer.nismExpiryDate
+    });
+    await poUser.save();
+
+    // Create Compliance Officer
+    const coUser = new User({
+      name: complianceOfficer.name,
+      email: complianceOfficer.email,
+      password: coPassword,
+      role: 'Compliance Officer',
+      companyId: companyId,
+      nismCertificateNumber: complianceOfficer.nismCertificateNumber,
+      nismExpiryDate: complianceOfficer.nismExpiryDate
+    });
+    await coUser.save();
+
+    // In a real scenario, we would send emails to PO and CO with their passwords here.
+    console.log(`[EMAIL MOCK] PO Password for ${poUser.email}: ${poPassword}`);
+    console.log(`[EMAIL MOCK] CO Password for ${coUser.email}: ${coPassword}`);
+
+    // Update Company
+    company.principalOfficer = poUser._id;
+    company.complianceOfficer = coUser._id;
+    company.policies = policies || [];
+    company.profileCompleted = true;
+
+    await company.save();
+
+    res.json({ message: "Admin setup completed successfully", company });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "An account with this email already exists." });
+    }
+    res.status(500).json({ message: err.message });
+  }
+};

@@ -1,5 +1,5 @@
 import { SidebarProvider, useSidebar } from "../context/SidebarContext";
-import { Outlet, Navigate } from "react-router";
+import { Outlet, Navigate, useLocation } from "react-router";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
@@ -35,10 +35,27 @@ const getCookie = (name: string) => {
 };
 
 const AppLayout: React.FC = () => {
-  const user = getCookie("user");
+  const userCookie = getCookie("user");
+  const location = useLocation();
 
-  if (!user) {
+  if (!userCookie) {
     return <Navigate to="/signin" replace />;
+  }
+
+  let user;
+  try {
+    user = JSON.parse(decodeURIComponent(userCookie));
+  } catch (e) {
+    // If cookie is malformed, clear it and force login
+    document.cookie = 'user=; Max-Age=-99999999;';
+    return <Navigate to="/signin" replace />;
+  }
+
+  const currentPath = location.pathname;
+  const isProfileIncomplete = user.profileCompleted === false || user.profileCompleted === undefined;
+
+  if (user.role === 'Admin' && isProfileIncomplete && currentPath !== '/admin/setup') {
+    return <Navigate to="/admin/setup" replace />;
   }
 
   return (

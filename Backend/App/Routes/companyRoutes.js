@@ -5,6 +5,7 @@ const companyController = require('../Controllers/companyController');
 router.get('/', companyController.getAllCompanies);
 router.get('/:id', companyController.getCompanyById);
 router.post('/', companyController.createCompany);
+router.post('/:id/setup', companyController.setupAdminProfile);
 router.put('/:id', companyController.updateCompany);
 router.put('/:id/status', companyController.toggleCompanyStatus);
 router.delete('/:id', companyController.deleteCompany);
