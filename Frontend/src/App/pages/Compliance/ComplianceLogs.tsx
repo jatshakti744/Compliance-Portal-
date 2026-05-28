@@ -2,18 +2,27 @@ import React, { useState, useEffect } from 'react';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import { complianceService } from '../../services/complianceService';
 import { fDate } from '../../utils/Date_format';
+import Alert from '../../components/ui/alert/Alert';
 
 export default function ComplianceLogs() {
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ companyId: '60d0fe4f5311236168a109ca', ruleName: '', violationStatus: true, penaltyAmount: 0, details: '' }); // Hardcoded company for now
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({ action: 'VIOLATION_DETECTED', ruleName: '', violationStatus: true, penaltyAmount: 0, details: '' });
+  const [toast, setToast] = useState<{ variant: "success" | "error" | "warning", title: string, message: string } | null>(null);
+
+  const showToast = (variant: "success" | "error" | "warning", title: string, message: string) => {
+    setToast({ variant, title, message });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchLogs = async () => {
     try {
-      const data = await complianceService.getLogsByCompany('60d0fe4f5311236168a109ca');
-      setLogs(data);
-    } catch (err) {
+      const data = await complianceService.getLogs();
+      setLogs(Array.isArray(data) ? data : []);
+    } catch (err: any) {
       console.error(err);
+      showToast("error", "Error", "Failed to fetch compliance logs.");
     }
   };
 
@@ -23,12 +32,17 @@ export default function ComplianceLogs() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await complianceService.createLog(formData);
+      showToast("success", "Violation Logged", "The manual violation log has been saved.");
       setShowForm(false);
+      setFormData({ action: 'VIOLATION_DETECTED', ruleName: '', violationStatus: true, penaltyAmount: 0, details: '' });
       fetchLogs();
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      showToast("error", "Action Failed", err.message || "Failed to create log.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,31 +74,59 @@ export default function ComplianceLogs() {
         <table className="w-full whitespace-nowrap text-left text-sm text-gray-500 dark:text-gray-400">
           <thead className="bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white">
             <tr>
-              <th className="px-6 py-4">Date</th>
-              <th className="px-6 py-4">Rule Name</th>
+              <th className="px-6 py-4">Date & Time</th>
+              <th className="px-6 py-4">Action Type</th>
+              <th className="px-6 py-4">Performed By</th>
               <th className="px-6 py-4">Details</th>
-              <th className="px-6 py-4 text-red-500">Penalty</th>
-              <th className="px-6 py-4">Status</th>
+              <th className="px-6 py-4">Status / Penalty</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {logs.map((log: any) => (
-              <tr key={log._id}>
-                <td className="px-6 py-4">{fDate(log.createdAt)}</td>
-                <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{log.ruleName}</td>
-                <td className="px-6 py-4">{log.details}</td>
-                <td className="px-6 py-4 font-medium text-red-500">₹{log.penaltyAmount}</td>
+              <tr key={log._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                 <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded text-xs ${log.resolved ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {log.resolved ? 'Resolved' : 'Action Required'}
+                  {fDate(log.createdAt)}<br/>
+                  <span className="text-xs text-gray-400">{new Date(log.createdAt).toLocaleTimeString()}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    log.action === 'RESEARCH_PUBLISHED' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
+                    log.action === 'CLIENT_ONBOARDED' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
+                    log.action === 'STAFF_CREATED' ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400' :
+                    'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'
+                  }`}>
+                    {log.action.replace('_', ' ')}
                   </span>
+                </td>
+                <td className="px-6 py-4 font-medium dark:text-white">
+                  {log.performedBy?.name || 'System'}<br/>
+                  <span className="text-xs text-gray-400 font-normal">{log.performedBy?.role || 'Auto'}</span>
+                </td>
+                <td className="px-6 py-4 whitespace-pre-wrap max-w-xs">{log.details}</td>
+                <td className="px-6 py-4">
+                  {log.violationStatus ? (
+                    <div>
+                      <span className={`px-2 py-1 rounded text-xs ${log.resolved ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {log.resolved ? 'Resolved' : 'Action Required'}
+                      </span>
+                      {log.penaltyAmount > 0 && <div className="text-red-500 font-medium mt-1">Penalty: ₹{log.penaltyAmount}</div>}
+                    </div>
+                  ) : (
+                    <span className="text-green-500 font-medium text-xs">OK</span>
+                  )}
                 </td>
               </tr>
             ))}
-            {logs.length === 0 && <tr><td colSpan={5} className="text-center py-4">No violations found</td></tr>}
+            {logs.length === 0 && <tr><td colSpan={5} className="text-center py-8 text-gray-500">No logs found</td></tr>}
           </tbody>
         </table>
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[999999] shadow-xl rounded-xl transition-all duration-300">
+          <Alert variant={toast.variant as any} title={toast.title} message={toast.message} />
+        </div>
+      )}
     </div>
   );
 }

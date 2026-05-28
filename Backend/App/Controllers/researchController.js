@@ -27,8 +27,13 @@ exports.createResearch = async (req, res) => {
     
     await research.save();
 
-    // In a real scenario, here we would also push a log to the Compliance Engine.
-    // e.g. ComplianceLog.create({ action: 'RESEARCH_PUBLISHED', entityId: research._id, ... })
+    const ComplianceLog = require('../Models/ComplianceLog');
+    await ComplianceLog.create({
+      companyId,
+      action: 'RESEARCH_PUBLISHED',
+      performedBy: author,
+      details: `Published ${req.body.type} call for ${req.body.title}`
+    });
 
     res.status(201).json({ message: "Research call published successfully", research });
   } catch (err) {

@@ -60,6 +60,14 @@ exports.createStaff = async (req, res) => {
     
     await newStaff.save();
 
+    const ComplianceLog = require('../Models/ComplianceLog');
+    await ComplianceLog.create({
+      companyId,
+      action: 'STAFF_CREATED',
+      performedBy: req.user._id,
+      details: `Created new staff member: ${email} as ${role}`
+    });
+
     res.status(201).json({ message: "Staff created successfully", staff: newStaff });
   } catch (err) {
     res.status(400).json({ message: err.message });

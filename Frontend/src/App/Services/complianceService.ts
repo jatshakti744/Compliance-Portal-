@@ -1,8 +1,8 @@
 import { config } from "../utils/config";
 
 export const complianceService = {
-  getLogsByCompany: async (companyId: string) => {
-    const res = await fetch(`${config.base_url}/compliance/company/${companyId}`, {
+  getLogs: async () => {
+    const res = await fetch(`${config.base_url}/compliance`, {
       method: "GET",
       credentials: "include",
     });

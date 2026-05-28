@@ -45,6 +45,14 @@ exports.createClient = async (req, res) => {
 
     // TODO: Email the password to the client
 
+    const ComplianceLog = require('../Models/ComplianceLog');
+    await ComplianceLog.create({
+      companyId,
+      action: 'CLIENT_ONBOARDED',
+      performedBy: req.user._id,
+      details: `Onboarded new client: ${email}`
+    });
+
     res.status(201).json({ message: "Client created successfully", client });
   } catch (err) {
     res.status(400).json({ message: err.message });
