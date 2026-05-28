@@ -6,9 +6,11 @@ const researchSchema = new mongoose.Schema({
   type: { type: String, enum: ['Buy', 'Sell', 'Hold', 'Trading Call', 'Model Portfolio'], required: true },
   title: { type: String, required: true },
   content: { type: String, required: true },
-  tncAccepted: { type: Boolean, default: false },
-  consentManaged: { type: Boolean, default: false },
-  status: { type: String, enum: ['Draft', 'Published', 'Archived'], default: 'Draft' }
+  targetPrice: { type: Number },
+  stopLoss: { type: Number },
+  tncAccepted: { type: Boolean, default: false, required: true },
+  conflictOfInterest: { type: Boolean, default: false, required: true },
+  status: { type: String, enum: ['Draft', 'Published', 'Archived'], default: 'Published' }
 }, {
   timestamps: true
 });

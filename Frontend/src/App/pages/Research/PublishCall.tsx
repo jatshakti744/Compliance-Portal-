@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
+import { researchService } from '../../Services/researchService';
+import Alert from '../../components/ui/alert/Alert';
 
 export default function PublishCall() {
   const [formData, setFormData] = useState({
@@ -12,20 +14,32 @@ export default function PublishCall() {
     conflictOfInterest: false
   });
   const [published, setPublished] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<{ variant: "success" | "error" | "warning", title: string, message: string } | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const showToast = (variant: "success" | "error" | "warning", title: string, message: string) => {
+    setToast({ variant, title, message });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.tncAccepted || !formData.conflictOfInterest) {
-      alert("You must accept SEBI Research Analyst regulations and conflict of interest policies before publishing.");
+      showToast("error", "Compliance Required", "You must accept SEBI Research Analyst regulations and conflict of interest policies before publishing.");
       return;
     }
-    // API mock
-    console.log("Publishing Research...", formData);
-    setPublished(true);
-    setTimeout(() => {
-      setPublished(false);
-      setFormData({ ...formData, title: '', content: '', targetPrice: '', stopLoss: '', tncAccepted: false, conflictOfInterest: false });
-    }, 3000);
+    setLoading(true);
+    try {
+      await researchService.publishCall(formData);
+      showToast("success", "Research Published", "Successfully published! Clients have been notified via Email.");
+      setPublished(true);
+      setFormData({ type: 'Buy', title: '', content: '', targetPrice: '', stopLoss: '', tncAccepted: false, conflictOfInterest: false });
+      setTimeout(() => setPublished(false), 3000);
+    } catch (err: any) {
+      showToast("error", "Action Failed", err.message || "Failed to publish research call.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,12 +101,18 @@ export default function PublishCall() {
           </div>
 
           <div className="flex justify-end pt-4">
-            <button type="submit" className={`px-6 py-3 text-white rounded-lg font-medium transition-colors ${(!formData.tncAccepted || !formData.conflictOfInterest) ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand-500 hover:bg-brand-600'}`}>
-              Publish to Clients
+            <button type="submit" disabled={loading || !formData.tncAccepted || !formData.conflictOfInterest} className={`px-6 py-3 text-white rounded-lg font-medium transition-colors ${(!formData.tncAccepted || !formData.conflictOfInterest || loading) ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/20'}`}>
+              {loading ? 'Publishing...' : 'Publish to Clients'}
             </button>
           </div>
         </form>
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[999999] shadow-xl rounded-xl transition-all duration-300">
+          <Alert variant={toast.variant as any} title={toast.title} message={toast.message} />
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,8 @@ const Research = require('../Models/Research');
 
 exports.getResearchByCompany = async (req, res) => {
   try {
-    const research = await Research.find({ companyId: req.params.companyId });
+    const companyId = req.user.companyId;
+    const research = await Research.find({ companyId }).populate('author', 'name email').sort({ createdAt: -1 });
     res.json(research);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -11,9 +12,25 @@ exports.getResearchByCompany = async (req, res) => {
 
 exports.createResearch = async (req, res) => {
   try {
-    const research = new Research(req.body);
+    const companyId = req.user.companyId;
+    const author = req.user._id;
+
+    if (!req.body.tncAccepted || !req.body.conflictOfInterest) {
+      return res.status(400).json({ message: "SEBI mandatory disclosures must be accepted." });
+    }
+
+    const research = new Research({
+      ...req.body,
+      companyId,
+      author
+    });
+    
     await research.save();
-    res.status(201).json(research);
+
+    // In a real scenario, here we would also push a log to the Compliance Engine.
+    // e.g. ComplianceLog.create({ action: 'RESEARCH_PUBLISHED', entityId: research._id, ... })
+
+    res.status(201).json({ message: "Research call published successfully", research });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
