@@ -7,8 +7,19 @@ export default function StaffRoles() {
   const [staff, setStaff] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'Staff', nismCertificateNumber: '', nismExpiryDate: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', role: 'Staff', nismCertificateNumber: '', nismExpiryDate: '', nismCertificateFile: '' });
   const [toast, setToast] = useState<{ variant: "success" | "error" | "warning", title: string, message: string } | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, nismCertificateFile: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const showToast = (variant: "success" | "error" | "warning", title: string, message: string) => {
     setToast({ variant, title, message });
@@ -36,7 +47,7 @@ export default function StaffRoles() {
       await adminService.createStaff(formData);
       showToast("success", "Staff Created", `${formData.name} has been added as a ${formData.role}.`);
       setShowForm(false);
-      setFormData({ name: '', email: '', role: 'Staff', nismCertificateNumber: '', nismExpiryDate: '' });
+      setFormData({ name: '', email: '', role: 'Staff', nismCertificateNumber: '', nismExpiryDate: '', nismCertificateFile: '' });
       fetchStaff();
     } catch (err: any) {
       showToast("error", "Action Failed", err.message || "Could not create staff.");
@@ -82,6 +93,10 @@ export default function StaffRoles() {
             <div>
               <label className="block text-sm font-medium mb-1.5 dark:text-gray-300">NISM Expiry Date</label>
               <input type="date" className="w-full p-2.5 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none" required value={formData.nismExpiryDate} onChange={e => setFormData({...formData, nismExpiryDate: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5 dark:text-gray-300">Upload NISM Cert</label>
+              <input type="file" accept="application/pdf,image/*" className="w-full p-2.5 border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none text-sm" onChange={handleFileChange} />
             </div>
             <div className="col-span-1 md:col-span-2 flex justify-end mt-2">
               <button type="submit" disabled={loading} className="px-6 py-2.5 bg-brand-500 text-white font-medium rounded-lg hover:bg-brand-600 transition-colors shadow-lg shadow-brand-500/20 disabled:opacity-50">

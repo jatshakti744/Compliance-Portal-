@@ -1,5 +1,6 @@
 const Client = require('../Models/Client');
 const User = require('../Models/User');
+const Company = require('../Models/Company');
 
 exports.getAllClients = async (req, res) => {
   try {
@@ -17,6 +18,11 @@ exports.createClient = async (req, res) => {
   try {
     const companyId = req.user.companyId;
     if (!companyId) return res.status(403).json({ message: "Access denied." });
+
+    const company = await Company.findById(companyId);
+    if (!company || company.completionPercentage < 80) {
+      return res.status(403).json({ message: "Company profile completion is less than 80%. Cannot onboard clients." });
+    }
 
     // Step 1: Create User Account for the client
     const { name, email, phone, pan, aadhaar } = req.body;

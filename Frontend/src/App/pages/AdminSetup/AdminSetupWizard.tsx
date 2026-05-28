@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { config } from '../../utils/config';
 import PageMeta from '../../components/common/PageMeta';
-import { config } from '../../Utils/config';
 import Alert from '../../components/ui/alert/Alert';
 
 const getCookie = (name: string) => {
@@ -12,7 +11,6 @@ const getCookie = (name: string) => {
 };
 
 export default function AdminSetupWizard() {
-  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ variant: "success" | "error" | "warning", title: string, message: string } | null>(null);
@@ -24,6 +22,7 @@ export default function AdminSetupWizard() {
 
   const [poData, setPoData] = useState({ name: '', email: '', nismCertificateNumber: '', nismExpiryDate: '' });
   const [coData, setCoData] = useState({ name: '', email: '', nismCertificateNumber: '', nismExpiryDate: '' });
+  const [goData, setGoData] = useState({ name: '', email: '', nismCertificateNumber: '', nismExpiryDate: '' });
   const [policies, setPolicies] = useState([
     { title: 'Code of Conduct', content: '' },
     { title: 'Internal Trading Policy', content: '' },
@@ -36,7 +35,7 @@ export default function AdminSetupWizard() {
     setPolicies(newPolicies);
   };
 
-  const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, 3));
+  const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, 4));
   const handlePrev = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   const handleSubmit = async () => {
@@ -53,6 +52,7 @@ export default function AdminSetupWizard() {
         body: JSON.stringify({
           principalOfficer: poData,
           complianceOfficer: coData,
+          grievanceOfficer: goData,
           policies: policies
         })
       });
@@ -89,12 +89,12 @@ export default function AdminSetupWizard() {
 
         {/* Stepper */}
         <div className="flex items-center justify-center mb-10">
-          {[1, 2, 3].map((step) => (
+          {[1, 2, 3, 4].map((step) => (
             <React.Fragment key={step}>
               <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm ${currentStep >= step ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
                 {step}
               </div>
-              {step < 3 && (
+              {step < 4 && (
                 <div className={`w-16 h-1 mx-2 rounded ${currentStep > step ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'}`}></div>
               )}
             </React.Fragment>
@@ -153,6 +153,30 @@ export default function AdminSetupWizard() {
 
           {currentStep === 3 && (
             <div className="space-y-6 animate-fade-in">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-4">Grievance Officer Details</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium mb-1.5 dark:text-gray-300">Full Name</label>
+                  <input type="text" className="w-full p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none dark:text-white transition-all" value={goData.name} onChange={e => setGoData({...goData, name: e.target.value})} placeholder="e.g. Amit Kumar" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5 dark:text-gray-300">Email Address</label>
+                  <input type="email" className="w-full p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none dark:text-white transition-all" value={goData.email} onChange={e => setGoData({...goData, email: e.target.value})} placeholder="amit@example.com" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5 dark:text-gray-300">NISM Certificate No. (Optional)</label>
+                  <input type="text" className="w-full p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none dark:text-white transition-all" value={goData.nismCertificateNumber} onChange={e => setGoData({...goData, nismCertificateNumber: e.target.value})} placeholder="e.g. NISM555555" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5 dark:text-gray-300">NISM Expiry Date</label>
+                  <input type="date" className="w-full p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none dark:text-white transition-all" value={goData.nismExpiryDate} onChange={e => setGoData({...goData, nismExpiryDate: e.target.value})} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 4 && (
+            <div className="space-y-6 animate-fade-in">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-4">Internal Policies</h2>
               <p className="text-sm text-gray-500">Please provide the text for your internal policies as required by SEBI guidelines.</p>
               
@@ -174,7 +198,7 @@ export default function AdminSetupWizard() {
               Back
             </button>
             
-            {currentStep < 3 ? (
+            {currentStep < 4 ? (
               <button 
                 onClick={handleNext} 
                 className="px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-medium transition-colors shadow-lg shadow-brand-500/20"

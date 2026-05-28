@@ -12,8 +12,10 @@ const companySchema = new mongoose.Schema({
   profileCompleted: { type: Boolean, default: false },
   principalOfficer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   complianceOfficer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  grievanceOfficer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   policies: [{ title: String, content: String }],
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+  completionPercentage: { type: Number, default: 0 }
 }, {
   timestamps: true
 });

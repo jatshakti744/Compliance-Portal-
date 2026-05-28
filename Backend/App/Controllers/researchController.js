@@ -1,4 +1,5 @@
 const Research = require('../Models/Research');
+const Company = require('../Models/Company');
 
 exports.getResearchByCompany = async (req, res) => {
   try {
@@ -14,6 +15,11 @@ exports.createResearch = async (req, res) => {
   try {
     const companyId = req.user.companyId;
     const author = req.user._id;
+
+    const company = await Company.findById(companyId);
+    if (!company || company.completionPercentage < 80) {
+      return res.status(403).json({ message: "Company profile completion is less than 80%. Cannot publish research." });
+    }
 
     if (!req.body.tncAccepted || !req.body.conflictOfInterest) {
       return res.status(400).json({ message: "SEBI mandatory disclosures must be accepted." });

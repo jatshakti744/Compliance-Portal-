@@ -136,12 +136,23 @@ exports.deleteCompany = async (req, res) => {
 exports.setupAdminProfile = async (req, res) => {
   try {
     const companyId = req.params.id;
-    const { principalOfficer, complianceOfficer, policies } = req.body;
+    const { principalOfficer, complianceOfficer, grievanceOfficer, policies } = req.body;
 
     const company = await Company.findById(companyId);
     if (!company) {
       return res.status(404).json({ message: "Company not found" });
     }
+
+    let completionScore = 10; // Basic details present gives 10%
+    if (principalOfficer?.name && principalOfficer?.email) completionScore += 20;
+    if (complianceOfficer?.name && complianceOfficer?.email) completionScore += 20;
+    if (grievanceOfficer?.name && grievanceOfficer?.email) completionScore += 20;
+    
+    let validPolicies = 0;
+    if (policies && Array.isArray(policies)) {
+      validPolicies = policies.filter(p => p.content && p.content.trim().length > 10).length;
+    }
+    completionScore += (validPolicies * 10); // max 3 policies = 30%
 
     // Generate random passwords
     const poPassword = crypto.randomBytes(6).toString('hex');
@@ -161,24 +172,40 @@ exports.setupAdminProfile = async (req, res) => {
 
     // Create Compliance Officer
     const coUser = new User({
-      name: complianceOfficer.name,
-      email: complianceOfficer.email,
+      name: complianceOfficer?.name,
+      email: complianceOfficer?.email,
       password: coPassword,
       role: 'Compliance Officer',
       companyId: companyId,
-      nismCertificateNumber: complianceOfficer.nismCertificateNumber,
-      nismExpiryDate: complianceOfficer.nismExpiryDate
+      nismCertificateNumber: complianceOfficer?.nismCertificateNumber,
+      nismExpiryDate: complianceOfficer?.nismExpiryDate
     });
-    await coUser.save();
+    if (complianceOfficer?.email) await coUser.save();
 
-    // In a real scenario, we would send emails to PO and CO with their passwords here.
-    console.log(`[EMAIL MOCK] PO Password for ${poUser.email}: ${poPassword}`);
-    console.log(`[EMAIL MOCK] CO Password for ${coUser.email}: ${coPassword}`);
+    // Create Grievance Officer
+    const goPassword = crypto.randomBytes(6).toString('hex');
+    const goUser = new User({
+      name: grievanceOfficer?.name,
+      email: grievanceOfficer?.email,
+      password: goPassword,
+      role: 'Staff', // Or perhaps Grievance Officer if that's a distinct role. Document just says Grievance Officer
+      companyId: companyId,
+      nismCertificateNumber: grievanceOfficer?.nismCertificateNumber,
+      nismExpiryDate: grievanceOfficer?.nismExpiryDate
+    });
+    if (grievanceOfficer?.email) await goUser.save();
+
+    // In a real scenario, we would send emails to PO, CO, GO with their passwords here.
+    if (principalOfficer?.email) console.log(`[EMAIL MOCK] PO Password for ${poUser.email}: ${poPassword}`);
+    if (complianceOfficer?.email) console.log(`[EMAIL MOCK] CO Password for ${coUser.email}: ${coPassword}`);
+    if (grievanceOfficer?.email) console.log(`[EMAIL MOCK] GO Password for ${goUser.email}: ${goPassword}`);
 
     // Update Company
-    company.principalOfficer = poUser._id;
-    company.complianceOfficer = coUser._id;
+    if (principalOfficer?.email) company.principalOfficer = poUser._id;
+    if (complianceOfficer?.email) company.complianceOfficer = coUser._id;
+    if (grievanceOfficer?.email) company.grievanceOfficer = goUser._id;
     company.policies = policies || [];
+    company.completionPercentage = Math.min(100, completionScore);
     company.profileCompleted = true;
 
     await company.save();

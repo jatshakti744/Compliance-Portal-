@@ -4,6 +4,7 @@ import { clientService } from "../../Services/clientService";
 import { superAdminService } from "../../Services/superAdminService";
 import { adminService } from "../../Services/adminService";
 import DataTable from "../../components/common/DataTable";
+import Chart from "react-apexcharts";
 
 const getCookie = (name: string) => {
   const value = `; ${document.cookie}`;
@@ -106,18 +107,81 @@ export default function Home() {
     );
   }
 
+  const candlestickOptions: any = {
+    chart: { type: 'candlestick', height: 350, toolbar: { show: false } },
+    title: { text: 'Research Analytics Performance', align: 'left' },
+    xaxis: { type: 'datetime' },
+    yaxis: { tooltip: { enabled: true } },
+    plotOptions: {
+      candlestick: { colors: { upward: '#10B981', downward: '#EF4444' } }
+    }
+  };
+
+  const radialOptions: any = {
+    chart: { type: 'radialBar', height: 350 },
+    plotOptions: {
+      radialBar: {
+        hollow: { size: '70%' },
+        dataLabels: { name: { show: true }, value: { show: true, fontSize: '24px' } }
+      }
+    },
+    labels: ['Compliance Score'],
+    colors: [data?.complianceScore < 80 ? '#EF4444' : '#10B981']
+  };
+
   return (
     <>
       <PageMeta title="Dashboard | RAGCP" description="Main dashboard" />
+      
+      {/* Top Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Clients</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.clients || '--'}</p>
+          <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Sales</h3>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">₹{data?.sales?.toLocaleString() || '--'}</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Revenue</h3>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">₹{data?.revenue?.toLocaleString() || '--'}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Active Subscriptions</h3>
           <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.subscriptions || '--'}</p>
         </div>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Clients</h3>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.clients || '--'}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Candlestick Chart */}
+        <div className="md:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+          {data?.researchAnalytics ? (
+            <Chart options={candlestickOptions} series={[{ data: data.researchAnalytics }]} type="candlestick" height={350} />
+          ) : (
+            <div className="h-[350px] flex items-center justify-center text-gray-500">Loading Analytics...</div>
+          )}
+        </div>
+
+        {/* Compliance Score */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center">
+          {data?.complianceScore !== undefined ? (
+            <>
+              <Chart options={radialOptions} series={[data.complianceScore]} type="radialBar" height={350} />
+              {data.complianceScore < 80 && (
+                <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm text-center">
+                  <strong>Warning:</strong> Profile completion is below 80%. Onboarding and publishing are blocked.
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-gray-500">Loading Score...</div>
+          )}
+        </div>
+      </div>
+
+      {/* Secondary Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Pending KYC</h3>
           <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.pending || '--'}</p>
@@ -125,13 +189,6 @@ export default function Home() {
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Compliance Alerts</h3>
           <p className="text-3xl font-bold text-red-500">{data?.alerts || '--'}</p>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 min-h-[400px] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Welcome to RAGCP Dashboard</h2>
-          <p className="text-gray-500 dark:text-gray-400">The central hub for all your compliance and research activities.</p>
         </div>
       </div>
     </>

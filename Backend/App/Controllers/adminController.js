@@ -10,6 +10,9 @@ exports.getDashboardData = async (req, res) => {
     // Total Clients
     const totalClients = await Client.countDocuments({ companyId });
 
+    const Company = require('../Models/Company');
+    const company = await Company.findById(companyId);
+
     // Active Subscriptions
     const activeSubscriptions = await Client.countDocuments({ companyId, subscriptionActive: true });
 
@@ -18,12 +21,31 @@ exports.getDashboardData = async (req, res) => {
 
     // Alerts / Compliance (Mocking this for now until compliance module is fully wired)
     const alerts = 0; // Replace with actual query against Compliance Logs later
+    
+    // Mocking Advanced Analytics for now
+    const sales = 150000; // ₹1,50,000
+    const revenue = 125000;
+    const complianceScore = company.completionPercentage || 0; // use completion percentage as base
+
+    // Candlestick data format for ApexCharts
+    const researchAnalytics = [
+      { x: new Date('2023-01-01'), y: [120, 130, 110, 125] },
+      { x: new Date('2023-02-01'), y: [125, 140, 120, 135] },
+      { x: new Date('2023-03-01'), y: [135, 150, 130, 145] },
+      { x: new Date('2023-04-01'), y: [145, 160, 140, 155] },
+      { x: new Date('2023-05-01'), y: [155, 170, 150, 165] },
+      { x: new Date('2023-06-01'), y: [165, 180, 160, 175] }
+    ];
 
     res.json({
       clients: totalClients,
       subscriptions: activeSubscriptions,
       pending: pendingKYC,
-      alerts
+      alerts,
+      sales,
+      revenue,
+      complianceScore,
+      researchAnalytics
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
