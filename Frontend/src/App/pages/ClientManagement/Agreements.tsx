@@ -52,7 +52,7 @@ export default function Agreements() {
             {loading ? (
               <tr><td colSpan={5} className="text-center py-8"><div className="inline-block w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div></td></tr>
             ) : clients.map((c: any) => {
-              const isSigned = c.kycStatus === 'Verified';
+              const isSigned = c.agreementSigned === true;
               return (
                 <tr key={c._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                   <td className="px-6 py-4 font-medium dark:text-white">{c.user?.name || 'Unknown'}</td>

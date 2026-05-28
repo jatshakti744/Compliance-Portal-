@@ -52,22 +52,21 @@ export default function Subscriptions() {
             {loading ? (
               <tr><td colSpan={5} className="text-center py-8"><div className="inline-block w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div></td></tr>
             ) : clients.map((c: any) => {
-              // Mocking subscription data based on client creation date for now
-              const isActive = c.subscriptionActive !== false; // Assuming true by default if not set
-              const expiryDate = new Date(c.createdAt);
-              expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+              // Using real subscription data from client model
+              const isActive = c.subscriptionActive;
+              const expiryDate = c.subscriptionExpiry ? new Date(c.subscriptionExpiry) : null;
 
               return (
                 <tr key={c._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                   <td className="px-6 py-4 font-medium dark:text-white">{c.user?.name || 'Unknown'}</td>
-                  <td className="px-6 py-4 font-medium text-gray-700 dark:text-gray-300">Annual Advisory Plan</td>
-                  <td className="px-6 py-4">₹15,000</td>
+                  <td className="px-6 py-4 font-medium text-gray-700 dark:text-gray-300">{c.subscriptionPlan || 'N/A'}</td>
+                  <td className="px-6 py-4">{c.subscriptionPlan ? '₹15,000' : '₹0'}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'}`}>
                       {isActive ? 'Active' : 'Expired'}
                     </span>
                   </td>
-                  <td className="px-6 py-4">{expiryDate.toLocaleDateString()}</td>
+                  <td className="px-6 py-4">{expiryDate ? expiryDate.toLocaleDateString() : 'N/A'}</td>
                 </tr>
               )
             })}
