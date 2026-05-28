@@ -79,3 +79,78 @@ exports.updateClient = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+exports.completeOnboarding = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { kycData, agreementsSigned, subscriptionPlan } = req.body;
+
+    const client = await Client.findOne({ user: userId });
+    if (!client) {
+      return res.status(404).json({ message: "Client profile not found. Please contact admin." });
+    }
+
+    if (kycData?.pan) client.pan = kycData.pan;
+    if (kycData?.aadhaar) client.aadhaar = kycData.aadhaar;
+    client.kycStatus = 'Verified';
+    client.kraStatus = 'Verified';
+
+    if (agreementsSigned) {
+      client.agreementSigned = true;
+      client.agreementUrl = 'https://mock-s3-bucket.com/agreements/signed.pdf'; 
+    }
+
+    if (subscriptionPlan) {
+      client.subscriptionPlan = subscriptionPlan;
+      client.subscriptionActive = true;
+      const expiry = new Date();
+      if (subscriptionPlan === 'Premium') {
+        expiry.setFullYear(expiry.getFullYear() + 1);
+      } else {
+        expiry.setMonth(expiry.getMonth() + 1);
+      }
+      client.subscriptionExpiry = expiry;
+    }
+
+    await client.save();
+    res.json({ message: "Onboarding completed successfully", client });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getMyProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const client = await Client.findOne({ user: userId }).populate('user', '-password');
+    if (!client) {
+      return res.status(404).json({ message: "Client profile not found." });
+    }
+    res.json(client);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getClientResearchCalls = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const client = await Client.findOne({ user: userId });
+    
+    if (!client) return res.status(404).json({ message: "Profile not found." });
+    
+    if (!client.subscriptionActive) {
+      return res.status(403).json({ message: "Active subscription required to view research calls." });
+    }
+
+    const Research = require('../Models/Research');
+    // Fetch only published calls for the company
+    const calls = await Research.find({ companyId: client.companyId, status: 'Published' })
+                                .sort({ createdAt: -1 })
+                                .populate('author', 'name role');
+    
+    res.json(calls);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

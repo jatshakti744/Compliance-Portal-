@@ -8,5 +8,8 @@ router.use(protect); // Ensure user is authenticated for all client routes
 router.get('/', clientController.getAllClients);
 router.post('/', clientController.createClient);
 router.put('/:id', clientController.updateClient);
+router.post('/complete-onboarding', clientController.completeOnboarding);
+router.get('/my-profile', clientController.getMyProfile);
+router.get('/research-calls', clientController.getClientResearchCalls);
 
 module.exports = router;

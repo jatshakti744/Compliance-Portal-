@@ -31,6 +31,7 @@ import PenaltyMatrix from "./App/pages/Compliance/PenaltyMatrix";
 // Client Portal
 import MySubscriptions from "./App/pages/ClientPortal/MySubscriptions";
 import ResearchCalls from "./App/pages/ClientPortal/ResearchCalls";
+import ClientOnboardingWizard from "./App/pages/ClientPortal/ClientOnboardingWizard";
 
 export default function App() {
   return (
@@ -66,6 +67,7 @@ export default function App() {
             {/* Client Portal (For end-users) */}
             <Route path="/client/subscriptions" element={<MySubscriptions />} />
             <Route path="/client/research-calls" element={<ResearchCalls />} />
+            <Route path="/client/onboarding" element={<ClientOnboardingWizard />} />
           </Route>
 
           {/* Auth Layout */}
