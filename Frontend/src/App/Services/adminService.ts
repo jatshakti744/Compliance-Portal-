@@ -6,11 +6,25 @@ import { config } from "../utils/config";
 
 export const adminService = {
   getClientList: async () => {
-    const res = await fetch(`${config.base_url}/admin/clients`, {
+    const res = await fetch(`${config.base_url}/clients`, {
       method: "GET",
       credentials: "include",
     });
     if (!res.ok) throw new Error("Failed to fetch clients");
+    return res.json();
+  },
+
+  createClient: async (clientData: any) => {
+    const res = await fetch(`${config.base_url}/clients`, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      credentials: "include",
+      body: JSON.stringify(clientData)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || "Failed to create client");
+    }
     return res.json();
   },
 
