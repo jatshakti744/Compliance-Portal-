@@ -7,4 +7,7 @@ router.use(protect);
 
 router.get('/dashboard', adminController.getDashboardData);
 
+router.get('/staff', adminController.getStaffList);
+router.post('/staff', adminController.createStaff);
+
 module.exports = router;

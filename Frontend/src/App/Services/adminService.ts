@@ -45,5 +45,28 @@ export const adminService = {
     });
     if (!res.ok) throw new Error("Failed to fetch admin dashboard data");
     return res.json();
+  },
+
+  getStaffList: async () => {
+    const res = await fetch(`${config.base_url}/admin/staff`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Failed to fetch staff");
+    return res.json();
+  },
+
+  createStaff: async (staffData: any) => {
+    const res = await fetch(`${config.base_url}/admin/staff`, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      credentials: "include",
+      body: JSON.stringify(staffData)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || "Failed to create staff");
+    }
+    return res.json();
   }
 };
