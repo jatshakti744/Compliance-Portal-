@@ -19,23 +19,35 @@ exports.getDashboardData = async (req, res) => {
     // Pending KYC
     const pendingKYC = await Client.countDocuments({ companyId, kycStatus: 'Pending' });
 
-    // Alerts / Compliance (Mocking this for now until compliance module is fully wired)
-    const alerts = 0; // Replace with actual query against Compliance Logs later
+    const ComplianceLog = require('../Models/ComplianceLog');
+    const alerts = await ComplianceLog.countDocuments({ companyId, violationStatus: true, resolved: false });
     
-    // Mocking Advanced Analytics for now
-    const sales = 150000; // ₹1,50,000
-    const revenue = 125000;
-    const complianceScore = company.completionPercentage || 0; // use completion percentage as base
+    // Dynamic Analytics based on real Client records
+    const sales = activeSubscriptions; // Total number of active plans sold
+    const revenue = activeSubscriptions * 15000; // Assuming 15,000 INR per active subscription
+    const complianceScore = company.completionPercentage || 0; 
 
-    // Candlestick data format for ApexCharts
-    const researchAnalytics = [
-      { x: new Date('2023-01-01'), y: [120, 130, 110, 125] },
-      { x: new Date('2023-02-01'), y: [125, 140, 120, 135] },
-      { x: new Date('2023-03-01'), y: [135, 150, 130, 145] },
-      { x: new Date('2023-04-01'), y: [145, 160, 140, 155] },
-      { x: new Date('2023-05-01'), y: [155, 170, 150, 165] },
-      { x: new Date('2023-06-01'), y: [165, 180, 160, 175] }
-    ];
+    // Dynamic Candlestick Data based on real Research records
+    const Research = require('../Models/Research');
+    const researchData = await Research.aggregate([
+      { $match: { companyId: company._id } },
+      { $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          totalCalls: { $sum: 1 },
+          buyCalls: { $sum: { $cond: [{ $eq: ["$type", "Buy"] }, 1, 0] } },
+          sellCalls: { $sum: { $cond: [{ $eq: ["$type", "Sell"] }, 1, 0] } }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    const researchAnalytics = researchData.map(item => {
+      // Candlestick mapping: [Open, High, Low, Close] -> [BuyCalls, TotalCalls, 0, SellCalls]
+      return {
+        x: new Date(`${item._id}-01`).getTime(),
+        y: [item.buyCalls, item.totalCalls, 0, item.sellCalls]
+      };
+    });
 
     res.json({
       clients: totalClients,

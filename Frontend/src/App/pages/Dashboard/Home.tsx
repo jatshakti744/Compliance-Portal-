@@ -137,19 +137,19 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Sales</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">₹{data?.sales?.toLocaleString() || '--'}</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.sales !== undefined ? `₹${data.sales.toLocaleString()}` : '--'}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Revenue</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">₹{data?.revenue?.toLocaleString() || '--'}</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.revenue !== undefined ? `₹${data.revenue.toLocaleString()}` : '--'}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Active Subscriptions</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.subscriptions || '--'}</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.subscriptions ?? '--'}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Total Clients</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.clients || '--'}</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.clients ?? '--'}</p>
         </div>
       </div>
 
@@ -184,11 +184,11 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Pending KYC</h3>
-          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.pending || '--'}</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-white">{data?.pending ?? '--'}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Compliance Alerts</h3>
-          <p className="text-3xl font-bold text-red-500">{data?.alerts || '--'}</p>
+          <p className="text-3xl font-bold text-red-500">{data?.alerts ?? '--'}</p>
         </div>
       </div>
     </>
