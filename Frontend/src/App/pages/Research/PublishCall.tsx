@@ -11,7 +11,8 @@ export default function PublishCall() {
     targetPrice: '',
     stopLoss: '',
     tncAccepted: false,
-    conflictOfInterest: false
+    conflictOfInterest: false,
+    internalPolicyRead: false
   });
   const [published, setPublished] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -75,8 +76,8 @@ export default function PublishCall() {
       showToast("error", "Missing Stock", "Please select a stock or enter a title.");
       return;
     }
-    if (!formData.tncAccepted || !formData.conflictOfInterest) {
-      showToast("error", "Compliance Required", "You must accept SEBI regulations and conflict of interest policies.");
+    if (!formData.tncAccepted || !formData.conflictOfInterest || !formData.internalPolicyRead) {
+      showToast("error", "Compliance Required", "You must accept all SEBI regulations, conflict of interest, and internal policies.");
       return;
     }
     setLoading(true);
@@ -84,7 +85,7 @@ export default function PublishCall() {
       await researchService.publishCall(formData);
       showToast("success", "Research Published", "Successfully published! Clients have been notified via Email.");
       setPublished(true);
-      setFormData({ type: 'Buy', title: '', content: '', targetPrice: '', stopLoss: '', tncAccepted: false, conflictOfInterest: false });
+      setFormData({ type: 'Buy', title: '', content: '', targetPrice: '', stopLoss: '', tncAccepted: false, conflictOfInterest: false, internalPolicyRead: false });
       fetchRecentCalls(); // Refresh the recent calls list
       setTimeout(() => setPublished(false), 3000);
     } catch (err: any) {
@@ -191,10 +192,14 @@ export default function PublishCall() {
               <input type="checkbox" className="mt-1" checked={formData.tncAccepted} onChange={e => setFormData({...formData, tncAccepted: e.target.checked})} />
               <span className="text-sm text-gray-600 dark:text-gray-400">I accept the standard terms & conditions for publishing research as per SEBI regulations.</span>
             </label>
+            <label className="flex items-start gap-3">
+              <input type="checkbox" className="mt-1" checked={formData.internalPolicyRead} onChange={e => setFormData({...formData, internalPolicyRead: e.target.checked})} />
+              <span className="text-sm text-gray-600 dark:text-gray-400">I confirm that this call strictly adheres to the company's internal research policies.</span>
+            </label>
           </div>
 
           <div className="flex justify-end pt-4">
-            <button type="submit" disabled={loading || !formData.tncAccepted || !formData.conflictOfInterest} className={`px-6 py-3 text-white rounded-lg font-medium transition-colors ${(!formData.tncAccepted || !formData.conflictOfInterest || loading) ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/20'}`}>
+            <button type="submit" disabled={loading || !formData.tncAccepted || !formData.conflictOfInterest || !formData.internalPolicyRead} className={`px-6 py-3 text-white rounded-lg font-medium transition-colors ${(!formData.tncAccepted || !formData.conflictOfInterest || !formData.internalPolicyRead || loading) ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/20'}`}>
               {loading ? 'Publishing...' : 'Publish to Clients'}
             </button>
           </div>

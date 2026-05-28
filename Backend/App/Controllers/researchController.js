@@ -21,7 +21,7 @@ exports.createResearch = async (req, res) => {
       return res.status(403).json({ message: "Company profile completion is less than 80%. Cannot publish research." });
     }
 
-    if (!req.body.tncAccepted || !req.body.conflictOfInterest) {
+    if (!req.body.tncAccepted || !req.body.conflictOfInterest || !req.body.internalPolicyRead) {
       return res.status(400).json({ message: "SEBI mandatory disclosures must be accepted." });
     }
 
