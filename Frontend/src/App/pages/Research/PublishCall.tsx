@@ -18,6 +18,12 @@ export default function PublishCall() {
   const [toast, setToast] = useState<{ variant: "success" | "error" | "warning", title: string, message: string } | null>(null);
   const [recentCalls, setRecentCalls] = useState<any[]>([]);
 
+  // Autocomplete state
+  const [stockQuery, setStockQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loadingStocks, setLoadingStocks] = useState(false);
+
   const showToast = (variant: "success" | "error" | "warning", title: string, message: string) => {
     setToast({ variant, title, message });
     setTimeout(() => setToast(null), 4000);
@@ -38,10 +44,39 @@ export default function PublishCall() {
     fetchRecentCalls();
   }, []);
 
+  // Handle stock search debouncing
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (stockQuery.length >= 2) {
+        setLoadingStocks(true);
+        const results = await researchService.searchStocks(stockQuery);
+        setSuggestions(results);
+        setShowSuggestions(true);
+        setLoadingStocks(false);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [stockQuery]);
+
+  const handleSelectStock = (stock: any) => {
+    const stockStr = `${stock.symbol} - ${stock.companyName}`;
+    setFormData({ ...formData, title: stockStr });
+    setStockQuery('');
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.title) {
+      showToast("error", "Missing Stock", "Please select a stock or enter a title.");
+      return;
+    }
     if (!formData.tncAccepted || !formData.conflictOfInterest) {
-      showToast("error", "Compliance Required", "You must accept SEBI Research Analyst regulations and conflict of interest policies before publishing.");
+      showToast("error", "Compliance Required", "You must accept SEBI regulations and conflict of interest policies.");
       return;
     }
     setLoading(true);
@@ -84,9 +119,50 @@ export default function PublishCall() {
             </select>
           </div>
           
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium mb-1 dark:text-gray-300">Stock / Title</label>
-            <input type="text" className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white" required placeholder="e.g. Buy Reliance Ind." value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
+            <input 
+              type="text" 
+              className="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white" 
+              required 
+              placeholder="Type to search stock (e.g. RELIANCE) or enter custom title" 
+              value={stockQuery || formData.title} 
+              onChange={e => {
+                setStockQuery(e.target.value);
+                setFormData({...formData, title: e.target.value});
+              }}
+              onFocus={() => {
+                if (suggestions.length > 0) setShowSuggestions(true);
+              }}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            />
+            
+            {showSuggestions && (
+              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {loadingStocks ? (
+                  <div className="p-3 text-sm text-gray-500 text-center">Searching...</div>
+                ) : suggestions.length > 0 ? (
+                  suggestions.map((s, idx) => (
+                    <div 
+                      key={idx} 
+                      className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0"
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent blur
+                        handleSelectStock(s);
+                      }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold text-gray-800 dark:text-white">{s.symbol}</span>
+                        <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-600 dark:text-gray-300">{s.exchange}</span>
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{s.companyName}</div>
+                    </div>
+                  ))
+                ) : stockQuery.length >= 2 ? (
+                  <div className="p-3 text-sm text-gray-500 text-center">No stocks found matching "{stockQuery}"</div>
+                ) : null}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

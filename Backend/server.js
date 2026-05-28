@@ -7,6 +7,7 @@ const connectDB = require('./App/Connection/mongo_db');
 // Routes
 const authRoutes = require('./App/Routes/authRoutes');
 const companyRoutes = require('./App/Routes/companyRoutes');
+const stockRoutes = require('./App/Routes/stockRoutes');
 
 dotenv.config();
 connectDB();
@@ -27,6 +28,7 @@ app.use('/api/users', require('./App/Routes/userRoutes'));
 app.use('/api/clients', require('./App/Routes/clientRoutes'));
 app.use('/api/research', require('./App/Routes/researchRoutes'));
 app.use('/api/compliance', require('./App/Routes/complianceRoutes'));
+app.use('/api/stocks', stockRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -10,6 +10,16 @@ export const researchService = {
     return res.json();
   },
 
+  searchStocks: async (query: string) => {
+    if (!query || query.length < 2) return [];
+    const res = await fetch(`${config.base_url}/stocks/search?q=${encodeURIComponent(query)}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!res.ok) return [];
+    return res.json();
+  },
+
   publishCall: async (researchData: any) => {
     const res = await fetch(`${config.base_url}/research`, {
       method: "POST",
